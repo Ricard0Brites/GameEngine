@@ -1,38 +1,51 @@
 #include "Engine.h"
 #include <iostream>
 
+#pragma region Engine
 
-Engine& Engine::Get()
+Engine::Engine(const UVector2 &WindowResolution, const WCHAR &GameName)
 {
-    static Engine instance; // thread-safe since C++11
+    const WCHAR* ClassName = L"EngineWindowClass";
+    EngineWindow = new WindowBase(UVector2(1280, 720), *ClassName , GameName);
+    EngineWindow->Init();
+}
+
+Engine& Engine::Get(const UVector2 &WindowResolution, const WCHAR &GameName)
+{
+    static Engine instance(WindowResolution, GameName); // thread-safe since C++11
     return instance;
 }
 
-void Engine::Launch(std::wstring GameName)
+void Engine::Launch()
 {
-    std::wstring ClassName = L"DX12EngineClass";
-
-    if (!RegisterWindowClass(ClassName.c_str()))
-        return;
-
-    if (!CreateWindowInstance(ClassName.c_str(), L"DirectX 12 Engine - " + GameName))
-        return;
-    
-
+    //Start Game Loop
     IsRunning = true;
-    MSG msg{};
     while (IsRunning)
     {
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        if (!EngineWindow)
         {
-            if (msg.message == WM_QUIT)
-                IsRunning = false;
-
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            IsRunning = false;
+            break;
         }
 
-        // Gameplay / rendering here
+        EngineWindow->UpdateMessages(); // Pump Win32 Messages
+
+
+        /*********************************************************************
+        *                                                                    *       
+        *   ---------------------   Gameplay  ----------------------------   *
+        *                                                                    *
+        *********************************************************************/
+
+
+
+        /*********************************************************************
+        *                                                                    *
+        *   ---------------------   Rendering  ---------------------------   *
+        *                                                                    *
+        *********************************************************************/
+
+
     }
 
 }
@@ -42,30 +55,28 @@ void Engine::Quit()
     IsRunning = false;
 }
 
-LRESULT CALLBACK Engine::WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+#pragma endregion
+
+#pragma region WindowBase
+HINSTANCE WindowBase::ModuleInstance = nullptr; // Static Definition
+
+void WindowBase::Init()
 {
-    switch (msg)
-    {
-        case WM_CLOSE:
-            DestroyWindow(hWnd);
-            Engine::Get().Quit();
-            break;
+    ModuleInstance = GetModuleHandle(nullptr);
+    
 
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            break;
-    }
-
-    return DefWindowProc(hWnd, msg, wParam, lParam);
+    if (!RegisterWindowClass() || !CreateWindowInstance())
+        return;
 }
 
-bool Engine::RegisterWindowClass(std::wstring ClassName)
+// Window Setup
+bool WindowBase::RegisterWindowClass()
 {
     /*  Create Window Class  */
     WNDCLASSEX WindowClassEX;
 
-    WindowClassEX.lpfnWndProc = &Engine::WindowProcedure;
-    WindowClassEX.hInstance = GetModuleHandle(nullptr);   
+    WindowClassEX.lpfnWndProc = &WindowBase::WindowProcedure;
+    WindowClassEX.hInstance = ModuleInstance;
 
     WindowClassEX.cbSize = sizeof(WNDCLASSEX);
     WindowClassEX.style = CS_HREDRAW | CS_VREDRAW; // Horizontal and Vertical Redraw
@@ -78,31 +89,31 @@ bool Engine::RegisterWindowClass(std::wstring ClassName)
     WindowClassEX.hIcon = LoadIcon(0, IDI_APPLICATION); // Application Icon
     WindowClassEX.hIconSm = WindowClassEX.hIcon; // Application Icon (Tray/Taskbar)
 
-    WindowClassEX.lpszClassName = ClassName.c_str();
+    WindowClassEX.lpszClassName = ClassName;
     WindowClassEX.lpszMenuName = nullptr; // Remove Menus
 
     bool res = RegisterClassEx(&WindowClassEX);
-    
-    if(!res ) 
+
+    if (!res)
         std::cout << "Window Class Registration failed" << std::endl;
 
     return res;
 }
 
-bool Engine::CreateWindowInstance(const std::wstring& ClassName, const std::wstring& GameName)
+bool WindowBase::CreateWindowInstance()
 {
-    WindowInstance = CreateWindowExW(
+    WindowInstance = CreateWindowEx(
         0,
-        ClassName.c_str(),
-        GameName.c_str(),
+        ClassName,
+        WindowTitle,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        1280,
-        720,
+        WindowSize.x,
+        WindowSize.y,
         nullptr,
         nullptr,
-        GetModuleHandle(nullptr),
+        ModuleInstance,
         this
     );
 
@@ -117,3 +128,62 @@ bool Engine::CreateWindowInstance(const std::wstring& ClassName, const std::wstr
 
     return true;
 }
+
+
+// Message Handling
+void WindowBase::UpdateMessages()
+{
+    MSG msg{};
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
+
+LRESULT CALLBACK WindowBase::WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    WindowBase* window = nullptr;
+
+    if (msg == WM_NCCREATE)
+    {
+        CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+        window = static_cast<WindowBase*>(cs->lpCreateParams);
+
+        SetWindowLongPtr(hWnd, GWLP_USERDATA,
+            reinterpret_cast<LONG_PTR>(window));
+
+        window->WindowInstance = hWnd;
+    }
+    else
+    {
+        window = reinterpret_cast<WindowBase*>(
+            GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    }
+
+    if (window)
+        return window->HandleWindowProcedure(msg, wParam, lParam); // Bubble event to instance (Overrides in children)
+
+    return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+LRESULT WindowBase::HandleWindowProcedure(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)
+    {
+        case WM_CLOSE:
+        {
+            DestroyWindow(WindowInstance);
+            return 0;
+        }
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+            return 0;
+        }
+    }
+
+    return DefWindowProc(WindowInstance, msg, wParam, lParam);
+}
+
+#pragma endregion
