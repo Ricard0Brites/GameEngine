@@ -38,6 +38,9 @@ void WindowBase::PumpMessages()
     MSG msg{};
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
     {
+        OnMessageReceived.Execute(msg.message); // Bubble Event
+        
+        // Standard Behavior
         if (msg.message == WM_QUIT)
         {
             OnDestroy.Execute();
