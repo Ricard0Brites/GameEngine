@@ -1,7 +1,8 @@
 #pragma once
 #include "Core/Core.h"
+#include "Windows/WindowBase.h"
 
-class ENGINE_API Engine
+class ENGINE_API Engine : private WindowBase
 {
 public:
     Engine(const WCHAR* InWindowTitle);
@@ -11,5 +12,4 @@ public:
 private:
     ~Engine();
     bool IsRunning = false;
-    class WindowBase* Window = nullptr;
 };

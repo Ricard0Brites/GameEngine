@@ -11,10 +11,14 @@ public:
 	WindowBase(const WCHAR* InWindowTitle);
 	~WindowBase();
 
-	virtual void PumpMessages();
-
 	/* Triggered Right Before Destruction */
 	Delegate<> OnDestroy;
+
+	/* Triggered on window event */
+	Delegate<UINT> OnMessageReceived;
+
+protected:
+	void PumpMessages();
 
 private:
 	bool RegisterWindowClass();

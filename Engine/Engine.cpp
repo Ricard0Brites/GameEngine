@@ -1,19 +1,15 @@
 #include "Engine.h"
 #include "Windows/WindowBase.h"
 
-Engine::Engine(const WCHAR* InWindowTitle) :
-    Window(new WindowBase(InWindowTitle))
+Engine::Engine(const WCHAR* InWindowTitle)
+    : WindowBase(InWindowTitle)
 {
-    if (Window)
-    {
-        Window->OnDestroy.Bind(this, &Engine::Quit);
-    }
+    OnDestroy.Bind(this, &Engine::Quit);
+
 }
 
 Engine::~Engine()
 {
-    if (Window)
-        delete(Window);
 }
 
 void Engine::Launch()
@@ -21,8 +17,7 @@ void Engine::Launch()
     IsRunning = true;
     while (IsRunning)
     {
-        if (Window)
-            Window->PumpMessages();
+        PumpMessages();
     }
 
 }
@@ -30,5 +25,4 @@ void Engine::Launch()
 void Engine::Quit()
 {
     IsRunning = false;
-
 }

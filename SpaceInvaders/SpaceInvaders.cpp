@@ -10,5 +10,7 @@ int main()
 		return 0;
 	}
 	
-	EngineInstance->Launch();
+	EngineInstance->Launch(); // Game Loop
+
+	// Any code here is only gonna be run at destroy
 }
