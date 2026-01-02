@@ -86,13 +86,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\DataTypes.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
+    <ClCompile Include="Object\Actor.cpp" />
     <ClCompile Include="Windows\WindowBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Core.h" />
+    <ClInclude Include="Core\DataTypes.h" />
     <ClInclude Include="Core\Delegate.h" />
+    <ClInclude Include="Object\Actor.h" />
+    <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Windows\WindowBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
