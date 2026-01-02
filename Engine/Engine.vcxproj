@@ -59,6 +59,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>Core\Core.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -75,6 +77,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>Core\Core.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,6 +88,12 @@
   <ItemGroup>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
+    <ClCompile Include="Windows\WindowBase.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Core.h" />
+    <ClInclude Include="Core\Delegate.h" />
+    <ClInclude Include="Windows\WindowBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

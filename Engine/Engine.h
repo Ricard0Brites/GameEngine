@@ -1,29 +1,15 @@
 #pragma once
-
-#include <string>
-#include "windows.h"
-
-#pragma region Macros
-#ifdef EXPORTS_ENGINE
-#define ENGINE_API __declspec(dllexport)
-#else
-#define ENGINE_API __declspec(dllimport)
-#endif
-#pragma endregion
+#include "Core/Core.h"
 
 class ENGINE_API Engine
 {
 public:
-    static Engine& Get();
-    void Launch(std::wstring GameName);
+    Engine(const WCHAR* InWindowTitle);
+    void Launch();
     void Quit();
 
-    static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 private:
-    Engine() = default;
-    HWND WindowInstance = nullptr;
+    ~Engine();
     bool IsRunning = false;
-
-    bool RegisterWindowClass(std::wstring ClassName);
-    bool CreateWindowInstance(const std::wstring& ClassName, const std::wstring& GameName);
+    class WindowBase* Window = nullptr;
 };
