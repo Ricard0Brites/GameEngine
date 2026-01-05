@@ -3,8 +3,7 @@
 
 Actor::Actor(Actor* Parent)
 {
-	Owner = Parent;
-	IsPendingKill = false;	
+	Owner = Parent;	
 }
 
 Actor::Actor(Actor* Parent, const char* DisplayName) : Actor(Parent)

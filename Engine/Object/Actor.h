@@ -28,4 +28,5 @@ protected:
 
 	//nullptr id means this object is independent
 	Object* Owner = nullptr;
+	bool IsPendingKill = false;
 };

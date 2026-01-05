@@ -1,30 +1,24 @@
 #pragma once
 #include "Core/Core.h"
+#include <memory>
 
 static LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+static int WindowIDRunningCount = 0;
 
-static int WindowIDRunningCount = 0; // No need to handle data races bc win32 by design is made to be run sync
-
-class WindowBase
+class ENGINE_API WindowBase
 {
 public:
-	WindowBase(const WCHAR* InWindowTitle);
-	~WindowBase();
+    struct WindowBaseImpl;
 
-	/* Triggered Right Before Destruction */
-	Delegate<> OnDestroy;
+    WindowBase(const WCHAR* InWindowTitle);
+    ~WindowBase();
 
-	/* Triggered on window event */
-	Delegate<UINT> OnMessageReceived;
-
+    virtual void OnMessageReceived(UINT msg) = 0;
+    virtual void OnDestroy() = 0; // Bubble Destroy Event To gracefully shutdown any systems (rendering mb
+    
 protected:
-	void PumpMessages();
+    void PumpMessages();
 
 private:
-	bool RegisterWindowClass();
-	bool CreateWindowInstance();
-
-	const WCHAR* WindowTitle, *ClassName;
-
-	HWND WindowHandle = nullptr;
+    WindowBaseImpl* Pimpl = nullptr;
 };
