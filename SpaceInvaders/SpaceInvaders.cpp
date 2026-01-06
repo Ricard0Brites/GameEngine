@@ -3,14 +3,10 @@
 
 int main()
 {
-	Engine* const EngineInstance = new Engine(L"Space Invaders");
-	if (!EngineInstance)
-	{
-		std::cout << "EngineInstance Is Not Valid. Aborting..." << std::endl;
-		return 0;
-	}
+	Engine EngineInstance(L"Space Invaders"); // Instance on the stack
 	
-	EngineInstance->Launch(); // Game Loop
+	// No need to check for validity or delete, destructor will be called automatically
+	EngineInstance.Launch(); // Game Loop
 
 	// Any code here is only gonna be run at destroy
 }

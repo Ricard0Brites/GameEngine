@@ -2,51 +2,81 @@
 #include "Core.h"
 #include <functional>
 #include <thread>
+#include <chrono>
+#include <type_traits>
+
+
 
 class ENGINE_API ThreadedTask
 {
-    friend class Engine;
+    friend class Engine; // The only one to call ThreadedTask::Join()
 public:
-    ThreadedTask() : Pimpl(new SData)
+    virtual void AsyncTick(float Delta) = 0;
+    ThreadedTask() : TaskData(new FData)
     {
-
+        Init();
     }
+
     ~ThreadedTask()
     {
-        if (Pimpl)
+        if (TaskData)
         {
-            if (Pimpl->Thread)
-                delete(Pimpl->Thread);
+            if (TaskData->Thread)
+            {
+                delete(TaskData->Thread);
+                TaskData->Thread = nullptr;
+            }
 
-            delete(Pimpl);
+            delete(TaskData);
+            TaskData = nullptr;
         }
     }
+    
+private:
 
     // Starts the async execution
-    virtual void Init(const std::function<void()>& Func)
-    {
-        Pimpl->StartFunction = Func;
-        if (Pimpl->StartFunction)
-        {
-            Pimpl->Thread = new std::thread(Pimpl->StartFunction);
-        }
-    }
-    virtual void End()
-    {
-        Join();
-    }
+    void Init();
+    //Runs the async loop
+    void Async_Init();
+    
+    bool IsRunning() { return TaskData->IsRunning; };
+    
+    void StopThread() { TaskData->IsRunning = false;  }
+    
+    void Join();
 
-    void Join()
-    {
-        if (Pimpl->Thread)
-            Pimpl->Thread->join();
-    }
 
-private:
-    struct SData
+    struct FData
     {
-        std::function<void()> StartFunction = nullptr;
+        FData() = default;
         std::thread* Thread = nullptr; // Friend declaration allows the engine to access 
+        bool IsRunning = false;
     };
-    SData* Pimpl = nullptr;
+    FData* TaskData = nullptr;
 };
+
+inline void ThreadedTask::Join()
+{
+    if (TaskData->Thread)
+        TaskData->Thread->join();
+}
+
+inline void ThreadedTask::Init()
+{
+    TaskData->IsRunning = true;
+    TaskData->Thread = new std::thread(&ThreadedTask::Async_Init, this);
+}
+
+inline void ThreadedTask::Async_Init()
+{
+    std::chrono::steady_clock::time_point PreviousFrame = std::chrono::high_resolution_clock::now();
+
+    while (IsRunning())
+    {
+        std::chrono::steady_clock::time_point CurrentFrame = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> DeltaTime = CurrentFrame - PreviousFrame;
+        PreviousFrame = CurrentFrame;
+
+        AsyncTick(DeltaTime.count());
+    }
+}

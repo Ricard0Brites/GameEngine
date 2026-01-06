@@ -10,34 +10,39 @@
 struct Engine::EngineImpl
 {
     bool IsRunning = false;
-    std::vector<ThreadedTask*> Tasks; // Keeps a ref to all the async tasks
+    std::vector<std::unique_ptr<ThreadedTask>> Tasks; // Keeps a ref to all the async tasks
 };
 
 // Constructor
 Engine::Engine(const WCHAR* InWindowTitle)
     : WindowBase(InWindowTitle), 
-    Pimpl(new EngineImpl) // Deleted in Engine::~Engine()
+    EngineData(new EngineImpl) // Deleted in Engine::~Engine()
 {
-    Pimpl->Tasks.push_back(new RenderSystem);   // Deleted in Engine::~Engine()
-    Pimpl->Tasks.push_back(new PhysicsSystem);  // Deleted in Engine::~Engine()
+    CreateThreadedTask<RenderSystem>();
+    CreateThreadedTask<PhysicsSystem>();
+}
+
+template<DerivedFromThreadedTask T>
+void Engine::CreateThreadedTask()
+{
+    // Emplace back directly constructs the unique_ptr in the vector
+    EngineData->Tasks.emplace_back(std::make_unique<T>());
 }
 
 // Destructor
 Engine::~Engine()
 {
-    DestroyThreadedTasks();
-
-    if (Pimpl)
+    if (EngineData)
     {
-        delete(Pimpl);
-        Pimpl = nullptr;
+        delete(EngineData);
+        EngineData = nullptr;
     }
 }
 
 void Engine::Launch()
 {
-    Pimpl->IsRunning = true;
-    while (Pimpl->IsRunning)
+    EngineData->IsRunning = true;
+    while (EngineData->IsRunning)
     {
         PumpMessages();
     }
@@ -49,8 +54,8 @@ void Engine::Launch()
 
 void Engine::Quit()
 {
-    Pimpl->IsRunning = false;
-    // The destructor will handle calling End() on tasks
+    EngineData->IsRunning = false;
+    StopThreads(); // Only stops execution (Destructor handles the rest)
 }
 
 void Engine::OnMessageReceived(UINT msg)
@@ -63,24 +68,24 @@ void Engine::OnDestroy()
     Quit();
 }
 
-void Engine::DestroyThreadedTasks()
-{
-    // Gracefully end all tasks before destruction
-    for (ThreadedTask* Task : Pimpl->Tasks)
-    {
-        if (!Task)
-            continue;
-
-        Task->End();
-        delete(Task);
-    }
-}
+#pragma region Threaded Tasks
 
 void Engine::JoinThreads()
 {
-    for (ThreadedTask* tt : Pimpl->Tasks)
+    for (const auto& tt : EngineData->Tasks)
     {
         if (tt)
             tt->Join();
     }
 }
+
+void Engine::StopThreads()
+{
+    for (const std::unique_ptr<ThreadedTask> &Task : EngineData->Tasks)
+    {
+        if (Task)
+            Task->StopThread();
+    }
+}
+
+#pragma endregion

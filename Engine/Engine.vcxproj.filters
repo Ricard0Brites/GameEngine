@@ -74,5 +74,8 @@
     <ClInclude Include="Systems\Render\RenderTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\EngineStatics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
