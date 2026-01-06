@@ -1,8 +1,8 @@
 #include "Engine.h"
 #include "Windows/WindowBase.h"
 
-#include "Systems/RenderSystem.h"
-#include "Systems/PhysicsSystem.h"
+#include "Systems/Render/RenderSystem.h"
+#include "Systems/Physics/PhysicsSystem.h"
 
 #include <vector>
 

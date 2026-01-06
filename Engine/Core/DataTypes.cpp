@@ -1,53 +1,53 @@
 #include "DataTypes.h"
 
-SVector::SVector()
+FVector::FVector()
 {
 }
 
-SVector::~SVector()
+FVector::~FVector()
 {
 
 }
 
-SVector SVector::UpVector(bool ApplyToSelf)
+FVector FVector::UpVector(bool ApplyToSelf)
 {
-	if(!ApplyToSelf) return SVector::CreateVector(0,0,1);
+	if(!ApplyToSelf) return FVector::CreateVector(0,0,1);
 
-	*this = SVector::CreateVector(0,0,1);
+	*this = FVector::CreateVector(0,0,1);
 	return *this;
 }
 
-SVector SVector::ForwardVector(bool ApplyToSelf)
+FVector FVector::ForwardVector(bool ApplyToSelf)
 {
-	if (!ApplyToSelf) return SVector::CreateVector(0, 1, 0);
+	if (!ApplyToSelf) return FVector::CreateVector(0, 1, 0);
 
-	*this = SVector::CreateVector(0, 1, 0);
+	*this = FVector::CreateVector(0, 1, 0);
 	return *this;
 }
 
-SVector SVector::RighVector(bool ApplyToSelf)
+FVector FVector::RighVector(bool ApplyToSelf)
 {
-	if (!ApplyToSelf) return SVector::CreateVector(1, 0, 0);
+	if (!ApplyToSelf) return FVector::CreateVector(1, 0, 0);
 
-	*this = SVector::CreateVector(1, 0, 0);
+	*this = FVector::CreateVector(1, 0, 0);
 	return *this;
 }
 
-SVector SVector::Zero(bool ApplyToSelf)
+FVector FVector::Zero(bool ApplyToSelf)
 {
-	if (!ApplyToSelf) return SVector::CreateVector(0, 0, 0);
+	if (!ApplyToSelf) return FVector::CreateVector(0, 0, 0);
 
-	*this = SVector::CreateVector(0, 0, 0);
+	*this = FVector::CreateVector(0, 0, 0);
 	return *this;
 }
 
-void SVector::Fill(float Payload)
+void FVector::Fill(float Payload)
 {
 	*this = Payload;
 }
 
 
-string SVector::ToString()
+string FVector::ToString()
 {
 	string StringToReturn = "";
 
@@ -60,28 +60,28 @@ string SVector::ToString()
 
 // Transform ---------------------------------------------------
 
-STransform::STransform()
+FTransform::FTransform()
 {
 	_Location = 0;
 	_Rotation = 0;
 	_Scale = 1;
 }
 
-STransform::~STransform()
+FTransform::~FTransform()
 {
 }
 
-SVector STransform::GetLocation()
+FVector FTransform::GetLocation()
 {	
 	return _Location;
 }
 
-SVector STransform::GetRotation()
+FVector FTransform::GetRotation()
 {
 	 return _Rotation;
 }
 
-SVector STransform::GetScale()
+FVector FTransform::GetScale()
 {
 	return _Scale;
 }

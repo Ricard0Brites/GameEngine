@@ -30,10 +30,13 @@
     <ClCompile Include="Object\Actor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Systems\PhysicsSystem.cpp">
+    <ClCompile Include="Systems\Physics\PhysicsSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Systems\RenderSystem.cpp">
+    <ClCompile Include="Systems\Render\RenderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,10 +62,16 @@
     <ClInclude Include="Core\ThreadedTask.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Systems\PhysicsSystem.h">
+    <ClInclude Include="Systems\Physics\PhysicsSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Systems\RenderSystem.h">
+    <ClInclude Include="Systems\Render\RenderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Render\RenderTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

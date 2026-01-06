@@ -2,12 +2,12 @@
 #include "object.h"
 #include "Core\DataTypes.h"
 
-class STransform;
+class FTransform;
 class Vector;
 
 class Actor : 
 	public Object,
-	public STransform
+	public FTransform
 {
 public:
 	Actor(Actor* Parent);
