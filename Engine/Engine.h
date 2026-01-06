@@ -2,11 +2,19 @@
 #include "Core/Core.h"
 #include "Windows/WindowBase.h"
 
+class ThreadedTask;
+
+template <typename T>
+concept DerivedFromThreadedTask = std::is_base_of_v<ThreadedTask, T>;
+
 class ENGINE_API Engine : private WindowBase
 {
 public:
     Engine(const WCHAR* InWindowTitle);
     ~Engine(); // Destructor must be defined in the .cpp file with PImpl
+    
+    // Forward-declare the implementation struct
+    struct EngineImpl;
 
     void Launch();
     void Quit();
@@ -14,25 +22,24 @@ public:
     // Window Base Interface
     void OnMessageReceived(UINT msg) override;
     void OnDestroy() override;
-
+    
+    //Threaded Tasks
+    template<DerivedFromThreadedTask T>
+    void CreateThreadedTask();
 private:
-    // Forward-declare the implementation struct
-    struct EngineImpl; 
-    
-    // The pointer to the implementation (PImpl)
-    EngineImpl *Pimpl;
+    // Remove Heap operations
+    void* operator new(size_t) = delete;
+    void* operator new[](size_t) = delete;
+    void operator delete(void*) = delete;
+    void operator delete[](void*) = delete;
 
-#pragma region Threaded Tasks
+    // The pointer to the implementation (Pimpl is used to resolve dependency linkage issues)
+    EngineImpl* EngineData;
 
-    /* ----------------- Memory Management ------------------------- */
-
-    //Call only on object destruction
-    void DestroyThreadedTasks(); 
-
-    /* ----------------- Helpers ------------------------- */
-
+    // Threads
     void JoinThreads();
-
-#pragma endregion
-    
+    void StopThreads();
 };
+
+
+

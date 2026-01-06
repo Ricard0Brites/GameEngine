@@ -99,6 +99,7 @@
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\DataTypes.h" />
     <ClInclude Include="Core\Delegate.h" />
+    <ClInclude Include="Core\EngineStatics.h" />
     <ClInclude Include="Core\ThreadedTask.hpp" />
     <ClInclude Include="Systems\Render\Interfaces\IRenderComponent.h" />
     <ClInclude Include="Object\Actor.h" />

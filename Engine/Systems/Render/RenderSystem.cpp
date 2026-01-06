@@ -2,24 +2,12 @@
 #include <iostream>
 
 
-RenderSystem::RenderSystem()
+RenderSystem::RenderSystem() : ThreadedTask()
 {
-    Init
-    (
-        [&]() 
-        {
-
-        }
-    );
-}
-
-void RenderSystem::Init(const std::function<void()>& Func)
-{
-    ThreadedTask::Init(Func);
 
 }
 
-void RenderSystem::End()
+void RenderSystem::AsyncTick(float Delta)
 {
-    ThreadedTask::End();
+	std::cout << "printing from Render System: " << Delta << std::endl;
 }

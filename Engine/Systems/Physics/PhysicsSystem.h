@@ -6,8 +6,6 @@ class ENGINE_API PhysicsSystem : public ThreadedTask
 public:
     PhysicsSystem();
 
-    void Init(const std::function<void()>& Func) override;
-    void End() override;
-
+	void AsyncTick(float Delta) override;
 
 };
