@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\DataTypes.cpp" />
+    <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
     <ClCompile Include="Systems\Render\Interfaces\IRenderComponent.cpp" />
