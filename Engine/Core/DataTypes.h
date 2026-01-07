@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <mutex>
 
 using namespace std;
 
@@ -14,8 +15,17 @@ enum ELifeCycleState : uint8_t
 
 class FVector
 {
+private:
+	mutable std::recursive_mutex _Mutex;
 public:
-	FVector();
+	FVector(const FVector& other)
+	{
+		std::lock_guard<std::recursive_mutex> lock(other._Mutex);
+		X = other.X;
+		Y = other.Y;
+		Z = other.Z;
+	}
+	FVector(float x = 0, float y = 0, float z = 0);
 	~FVector();
 
 	float X = 0,
@@ -34,79 +44,94 @@ public:
 	void Fill(float Payload);
 	//Converts a vector to a string
 	string ToString();
-	
-	// Returns a copy of a custom made Vector
-	static FVector CreateVector(float PayloadX, float PayloadY, float PayloadZ) { FVector vec; vec.X = PayloadX; vec.Y = PayloadY; vec.Z = PayloadZ; return vec; };
 
 	//operators ----------------------------
 
 	//vector
-	FVector operator=(const FVector a){ X = a.X, Y = a.Y, Z = a.Z; return *this; };
+	FVector& operator=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X = in.X; Y = in.Y; Z = in.Z; return *this; };
 
-	FVector operator+=(const FVector a){ X+=a.X, Y+=a.Y, Z+=a.Z; return *this; };
-	FVector operator-=(const FVector a){ X-=a.X, Y-=a.Y, Z-=a.Z; return *this; };
-	FVector operator*=(const FVector a){ X*=a.X, Y*=a.Y, Z*=a.Z; return *this; };
-	FVector operator/=(const FVector a){ X/=a.X, Y/=a.Y, Z/=a.Z; return *this; };
+	FVector& operator+=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X += in.X; Y += in.Y; Z += in.Z; return *this; };
+	FVector& operator-=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X -= in.X; Y -= in.Y; Z -= in.Z; return *this; };
+	FVector& operator*=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X *= in.X; Y *= in.Y; Z *= in.Z; return *this; };
+	FVector& operator/=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X /= in.X; Y /= in.Y; Z /= in.Z; return *this; };
 	
-	FVector operator+(const FVector a) { FVector temp; temp.X = X + a.X, temp.Y = Y + a.Y, temp.Z = Z + a.Z; return temp;};
-	FVector operator-(const FVector a) { FVector temp; temp.X = X - a.X, temp.Y = Y - a.Y, temp.Z = Z - a.Z; return temp; };
-	FVector operator*(const FVector a) { FVector temp; temp.X = X * a.X, temp.Y = Y * a.Y, temp.Z = Z * a.Z; return temp; };
-	FVector operator/(const FVector a) { FVector temp; temp.X = X / a.X, temp.Y = Y / a.Y, temp.Z = Z / a.Z; return temp; };
+	FVector operator+(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X + in.X, Y + in.Y, Z + in.Z);};
+	FVector operator-(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X - in.X, Y - in.Y, Z - in.Z);};
+	FVector operator*(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X * in.X, Y * in.Y, Z * in.Z);};
+	FVector operator/(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X / in.X, Y / in.Y, Z / in.Z);};
 
 	//float
-	FVector operator=(float a) { X = a, Y = a, Z = a; return *this; };
+	FVector& operator=(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X = in; Y = in; Z = in; return *this; };
 
-	FVector operator+=(float a) { X += a, Y += a, Z += a; return *this; };
-	FVector operator-=(float a) { X -= a, Y -= a, Z -= a; return *this; };
-	FVector operator*=(float a){ X*=a, Y*=a, Z*=a; return *this; };
-	FVector operator/=(float a){ X/=a, Y/=a, Z/=a; return *this; };
+	FVector& operator+=(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X += in; Y += in; Z += in; return *this; };
+	FVector& operator-=(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X -= in; Y -= in; Z -= in; return *this; };
+	FVector& operator*=(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X *= in; Y *= in; Z *= in; return *this; };
+	FVector& operator/=(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X /= in; Y /= in; Z /= in; return *this; };
 
-	FVector operator+(float a){ FVector temp;  temp.X = X + a, temp.Y = Y + a, temp.Z = Z + a; return temp; };
-	FVector operator-(float a) { FVector temp;  temp.X = X - a, temp.Y = Y - a, temp.Z = Z - a; return temp; };
-	FVector operator*(float a) { FVector temp;  temp.X = X * a, temp.Y = Y * a, temp.Z = Z * a; return temp; };
-	FVector operator/(float a) { FVector temp;  temp.X = X / a, temp.Y = Y / a, temp.Z = Z / a; return temp; };
+	FVector operator+(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X + in, Y + in, Z + in); };
+	FVector operator-(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X - in, Y - in, Z - in); };
+	FVector operator*(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X * in, Y * in, Z * in); };
+	FVector operator/(float in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); return FVector(X / in, Y / in, Z / in); };
 
 	//bool
-	bool operator==(const FVector a){ if( Y == a.Y && Z == a.Z && X == a.X ) return true; return false; }
-	bool operator!=(const FVector a){ if( Y != a.Y || Z != a.Z || X != a.X ) return true; return false; }
-
+	bool operator==(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); if( Y == in.Y && Z == in.Z && X == in.X ) return true; return false; }
+	bool operator!=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); if( Y != in.Y || Z != in.Z || X != in.X ) return true; return false; }
 };
 
 class FTransform
 {
+private:
+	mutable std::mutex _locationMutex;
+	mutable std::mutex _rotationMutex;
+	mutable std::mutex _scaleMutex;
+
+	FVector _Location, _Rotation, _Scale;
+
 public:
+	FTransform& operator=(const FTransform& in) 
+	{ 
+		std::lock(_locationMutex, _rotationMutex, _scaleMutex);
+		std::lock_guard<std::mutex> ll(_locationMutex, std::adopt_lock);
+		std::lock_guard<std::mutex> lr(_rotationMutex, std::adopt_lock);
+		std::lock_guard<std::mutex> ls(_scaleMutex, std::adopt_lock);
+
+		_Location = in._Location;
+		_Rotation = in._Rotation;
+		_Scale = in._Scale; 
+		IsRelative = in.IsRelative;
+		return *this; 
+	};
 	FTransform();
 	~FTransform();
+	
+	FTransform(const FTransform& in)
+    {
+        std::lock(in._locationMutex, in._rotationMutex, in._scaleMutex);
+        std::lock_guard<std::mutex> ol(in._locationMutex, std::adopt_lock);
+        std::lock_guard<std::mutex> orot(in._rotationMutex, std::adopt_lock);
+        std::lock_guard<std::mutex> os(in._scaleMutex, std::adopt_lock);
+
+        _Location = in._Location;
+        _Rotation = in._Rotation;
+        _Scale = in._Scale;
+        IsRelative = in.IsRelative;
+    }
 
 	// whether this transform is relative to a parent or not
 	bool IsRelative = false;
 
-	void SetLocation(FVector NewLocation) {_Location = NewLocation; }
-	void SetRelativeLocation(FVector NewLocation) { _RelativeLocation = NewLocation; }
-	void SetRotation(FVector NewRotation) { _Rotation = NewRotation; }
-	void SetRelativeRotation(FVector NewRotation) { _RelativeRotation = NewRotation; }
-	void SetScale(FVector NewScale) { _Scale = NewScale; }
-	void SetRelativeScale(FVector NewScale) { _RelativeScale = NewScale; }
+	void SetLocation(FVector NewLocation) { std::lock_guard<std::mutex> lock(_locationMutex); _Location = NewLocation; }
+	void SetRotation(FVector NewRotation) { std::lock_guard<std::mutex> lock(_rotationMutex); _Rotation = NewRotation; }
+	void SetScale(FVector NewScale) { std::lock_guard<std::mutex> lock(_scaleMutex); _Scale = NewScale; }
 
 
 	// Returns a copy of World location
 	FVector GetLocation();
-	//Returns a copy of the relative Location
-	FVector GetRelativeLocation() { return _RelativeLocation; }
 	// Returns a copy of World rotation
 	FVector GetRotation();
-	//Returns a copy of the relative Rotation
-	FVector GetRelativeRotation() { return _RelativeRotation; }
 	// Returns a copy of World Scale
 	FVector GetScale();
-	//Returns a copy of the relative Scale
-	FVector GetRelativeScale() { return _RelativeScale; }
 
-private:
-	FVector _Location, _Rotation, _Scale;
-	FVector _RelativeLocation, _RelativeRotation, _RelativeScale;
-
-	FTransform operator=(const FTransform a) { _Location = a._Location, _Rotation = a._Rotation, _Scale = a._Scale, IsRelative = a.IsRelative; return *this; };
 };
 
 struct FColor

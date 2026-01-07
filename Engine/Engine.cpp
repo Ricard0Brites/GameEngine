@@ -60,7 +60,7 @@ void Engine::Quit()
 
 void Engine::OnMessageReceived(UINT msg)
 {
-	// TODO
+	// TODO - Input Event Handling
 }
 
 void Engine::OnDestroy()

@@ -1,6 +1,10 @@
 #include "DataTypes.h"
 
-FVector::FVector()
+
+FVector::FVector(float x, float y, float z) : 
+	X(x),
+	Y(y),
+	Z(z)
 {
 }
 
@@ -11,44 +15,58 @@ FVector::~FVector()
 
 FVector FVector::UpVector(bool ApplyToSelf)
 {
-	if(!ApplyToSelf) return FVector::CreateVector(0,0,1);
-
-	*this = FVector::CreateVector(0,0,1);
-	return *this;
+	const FVector up(0, 0, 1);
+	if (ApplyToSelf)
+	{
+		std::lock_guard<std::recursive_mutex> lock(_Mutex);
+		*this = up;
+	}
+	return up;
 }
 
 FVector FVector::ForwardVector(bool ApplyToSelf)
 {
-	if (!ApplyToSelf) return FVector::CreateVector(0, 1, 0);
-
-	*this = FVector::CreateVector(0, 1, 0);
-	return *this;
+	const FVector forward(0, 1, 0);
+	if (ApplyToSelf)
+	{
+		std::lock_guard<std::recursive_mutex> lock(_Mutex);
+		*this = forward;
+	}
+	return forward;
 }
 
 FVector FVector::RighVector(bool ApplyToSelf)
 {
-	if (!ApplyToSelf) return FVector::CreateVector(1, 0, 0);
-
-	*this = FVector::CreateVector(1, 0, 0);
-	return *this;
+	const FVector right(1, 0, 0);
+	if (ApplyToSelf)
+	{
+		std::lock_guard<std::recursive_mutex> lock(_Mutex);
+		*this = right;
+	}
+	return right;
 }
 
 FVector FVector::Zero(bool ApplyToSelf)
 {
-	if (!ApplyToSelf) return FVector::CreateVector(0, 0, 0);
-
-	*this = FVector::CreateVector(0, 0, 0);
-	return *this;
+	const FVector zero(0, 0, 0);
+	if (ApplyToSelf)
+	{
+		std::lock_guard<std::recursive_mutex> lock(_Mutex);
+		*this = zero;
+	}
+	return zero;
 }
 
 void FVector::Fill(float Payload)
 {
+	std::lock_guard<std::recursive_mutex> lock(_Mutex);
 	*this = Payload;
 }
 
 
 string FVector::ToString()
 {
+	std::lock_guard<std::recursive_mutex> lock(_Mutex);
 	string StringToReturn = "";
 
 	StringToReturn += "X=" + to_string(X);
@@ -73,15 +91,18 @@ FTransform::~FTransform()
 
 FVector FTransform::GetLocation()
 {	
+	std::lock_guard<std::mutex> lock(_locationMutex);
 	return _Location;
 }
 
 FVector FTransform::GetRotation()
 {
-	 return _Rotation;
+	std::lock_guard<std::mutex> lock(_rotationMutex);
+	return _Rotation;
 }
 
 FVector FTransform::GetScale()
 {
+	std::lock_guard<std::mutex> lock(_scaleMutex);
 	return _Scale;
 }

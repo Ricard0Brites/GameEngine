@@ -1,8 +1,8 @@
 #pragma once
 #include "Core.h"
+#include <chrono>
 #include <functional>
 #include <thread>
-#include <chrono>
 #include <type_traits>
 
 

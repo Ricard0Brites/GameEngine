@@ -18,14 +18,10 @@ Actor::~Actor()
 {
 }
 
-void Actor::Tick(float DeltaSeconds)
+void Actor::Tick(float Delta)
 {
 	if (IsPendingKill) return;
-	if (Owner)
-	{
-		if (Actor* OwnerActor = dynamic_cast<Actor*>(Owner))
-			SetLocation(OwnerActor->GetLocation() + GetRelativeLocation());
-	}
+	
 }
 
 void Actor::BeginPlay()
