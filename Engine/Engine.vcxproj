@@ -90,6 +90,7 @@
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
+    <ClCompile Include="Systems\Collision\CollisionSystem.cpp" />
     <ClCompile Include="Systems\Render\Interfaces\IRenderComponent.cpp" />
     <ClCompile Include="Object\Actor.cpp" />
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="Core\Delegate.h" />
     <ClInclude Include="Core\EngineStatics.h" />
     <ClInclude Include="Core\ThreadedTask.hpp" />
+    <ClInclude Include="Systems\Collision\CollisionSystem.h" />
     <ClInclude Include="Systems\Render\Interfaces\IRenderComponent.h" />
     <ClInclude Include="Object\Actor.h" />
     <ClInclude Include="Object\Object.h" />

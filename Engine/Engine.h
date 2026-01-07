@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Core.h"
 #include "Windows/WindowBase.h"
+#include <vector>
 
 class ThreadedTask;
 
@@ -14,7 +15,7 @@ public:
     ~Engine(); // Destructor must be defined in the .cpp file with PImpl
     
     // Forward-declare the implementation struct
-    struct EngineImpl;
+    struct FEngineData;
 
     void Launch();
     void Quit();
@@ -33,13 +34,19 @@ private:
     void operator delete(void*) = delete;
     void operator delete[](void*) = delete;
 
-    // The pointer to the implementation (Pimpl is used to resolve dependency linkage issues)
-    EngineImpl* EngineData;
+    // Pointer to the implementation
+    FEngineData* EngineData;
 
     // Threads
     void JoinThreads();
     void StopThreads();
 };
 
-
-
+// Define the implementation struct (PImpl - pointer to implementation)
+struct Engine::FEngineData
+{
+    bool IsRunning = false;
+    
+    // Keeps a reference & ownership of all threaded tasks
+    std::vector<std::unique_ptr<ThreadedTask>> Tasks;
+};

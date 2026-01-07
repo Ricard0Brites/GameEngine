@@ -1,25 +1,17 @@
 #include "Engine.h"
-#include "Windows/WindowBase.h"
-
-#include "Systems/Render/RenderSystem.h"
+#include "Systems/Collision/CollisionSystem.h"
 #include "Systems/Physics/PhysicsSystem.h"
-
-#include <vector>
-
-// Define the implementation struct (PImpl - pointer to implementation)
-struct Engine::EngineImpl
-{
-    bool IsRunning = false;
-    std::vector<std::unique_ptr<ThreadedTask>> Tasks; // Keeps a ref to all the async tasks
-};
+#include "Systems/Render/RenderSystem.h"
+#include "Windows/WindowBase.h"
 
 // Constructor
 Engine::Engine(const WCHAR* InWindowTitle)
     : WindowBase(InWindowTitle), 
-    EngineData(new EngineImpl) // Deleted in Engine::~Engine()
+    EngineData(new FEngineData) // Deleted in Engine::~Engine()
 {
     CreateThreadedTask<RenderSystem>();
     CreateThreadedTask<PhysicsSystem>();
+    CreateThreadedTask<CollisionSystem>();
 }
 
 template<DerivedFromThreadedTask T>

@@ -1,23 +1,20 @@
 #pragma once
 #include "Core.h"
 #include <chrono>
-#include <functional>
 #include <thread>
-#include <type_traits>
-
-
 
 class ENGINE_API ThreadedTask
 {
     friend class Engine; // The only one to call ThreadedTask::Join()
 public:
     virtual void AsyncTick(float Delta) = 0;
+    
     ThreadedTask() : TaskData(new FData)
     {
         Init();
     }
 
-    ~ThreadedTask()
+    virtual ~ThreadedTask()
     {
         if (TaskData)
         {
