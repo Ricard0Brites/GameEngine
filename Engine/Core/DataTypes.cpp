@@ -1,18 +1,5 @@
 #include "DataTypes.h"
 
-
-FVector::FVector(float x, float y, float z) : 
-	X(x),
-	Y(y),
-	Z(z)
-{
-}
-
-FVector::~FVector()
-{
-
-}
-
 FVector FVector::UpVector(bool ApplyToSelf)
 {
 	const FVector up(0, 0, 1);
@@ -63,7 +50,7 @@ void FVector::Fill(float Payload)
 	*this = Payload;
 }
 
-std::string FVector::ToString(char* buffer, size_t bufferSize) const
+std::string FVector::ToString() const
 {
 	std::lock_guard<std::recursive_mutex> lock(_Mutex);
 	string StringToReturn = "";
