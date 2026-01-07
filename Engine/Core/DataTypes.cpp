@@ -63,8 +63,7 @@ void FVector::Fill(float Payload)
 	*this = Payload;
 }
 
-
-string FVector::ToString()
+std::string FVector::ToString(char* buffer, size_t bufferSize) const
 {
 	std::lock_guard<std::recursive_mutex> lock(_Mutex);
 	string StringToReturn = "";

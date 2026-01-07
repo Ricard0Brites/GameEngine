@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <mutex>
+#include "Core/Core.h"
 
 using namespace std;
 
@@ -13,7 +14,9 @@ enum ELifeCycleState : uint8_t
 
 };
 
-class FVector
+#pragma warning(push)
+#pragma warning(disable: 4251)
+struct ENGINE_API FVector
 {
 private:
 	mutable std::recursive_mutex _Mutex;
@@ -43,7 +46,7 @@ public:
 	//Fills the vector with the provided float
 	void Fill(float Payload);
 	//Converts a vector to a string
-	string ToString();
+	std::string ToString(char* buffer, size_t bufferSize) const;
 
 	//operators ----------------------------
 
@@ -78,7 +81,7 @@ public:
 	bool operator!=(const FVector& in) { std::lock_guard<std::recursive_mutex> lock(_Mutex); if( Y != in.Y || Z != in.Z || X != in.X ) return true; return false; }
 };
 
-class FTransform
+struct ENGINE_API FTransform
 {
 private:
 	mutable std::mutex _locationMutex;
@@ -89,7 +92,7 @@ private:
 
 public:
 	FTransform& operator=(const FTransform& in) 
-	{ 
+	{
 		std::lock(_locationMutex, _rotationMutex, _scaleMutex);
 		std::lock_guard<std::mutex> ll(_locationMutex, std::adopt_lock);
 		std::lock_guard<std::mutex> lr(_rotationMutex, std::adopt_lock);
@@ -133,7 +136,7 @@ public:
 	FVector GetScale();
 
 };
-
+#pragma warning(pop)
 struct FColor
 {
 	float R = 0.f, G = 0.f, B = 0.f, A = 1.f;

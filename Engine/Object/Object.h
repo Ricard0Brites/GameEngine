@@ -1,6 +1,7 @@
 #pragma once
+#include "Core/Core.h"
 
-class Object
+class ENGINE_API Object
 {
 	
 public:

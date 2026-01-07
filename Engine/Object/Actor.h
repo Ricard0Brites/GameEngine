@@ -1,11 +1,10 @@
 #pragma once
 #include "object.h"
 #include "Core\DataTypes.h"
+#include "Core\Core.h"
+#include <vector>
 
-class FTransform;
-class Vector;
-
-class Actor : 
+class ENGINE_API Actor : 
 	public Object,
 	public FTransform
 {
@@ -14,19 +13,19 @@ public:
 	Actor(Actor* Parent, const char* DisplayName);
 	~Actor();
 
-#ifdef _DEBUG
-	std::string ActorDisplayName = "";
-#endif // _DEBUG
-
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	Object* GetOwner() { return Owner; }
+	Actor* GetOwner() { return Owner; }
 
 protected:
-
 	//nullptr id means this object is independent
-	Object* Owner = nullptr;
+	Actor* Owner = nullptr;
+	//std::vector<std::unique_ptr<Actor>> Children = {};
 	bool IsPendingKill = false;
+
+	// Pimpl - Pointer to implementation (DLL linkage warning removal)
+	struct FActorData;
+	FActorData* Data = nullptr;
 };
