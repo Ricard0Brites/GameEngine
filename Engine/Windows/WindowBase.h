@@ -19,6 +19,7 @@ public:
 
 protected:
 	void PumpMessages();
+	HWND* GetWindowHandle() { return &WindowHandle;  }
 
 private:
 	bool RegisterWindowClass();
