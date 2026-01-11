@@ -174,6 +174,12 @@ void Engine::CreatePSO()
     DeviceRef->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)); // Create PSO
 }
 
+void Engine::CreateCommandsList()
+{
+    DeviceRef->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandAllocator.Get(), PSO.Get(), IID_PPV_ARGS(&CommandList));
+    CommandList->Close();
+}
+
 #pragma endregion 
 
 void Engine::GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc)

@@ -31,7 +31,7 @@ private:
     void CreateVertexShader();
     void CreatePixelShader();
     void CreatePSO();
-    void CreateCommandsList(); // WIP
+    void CreateCommandsList();
     void CreateVertexBuffer(); // WIP
     void CreateFence(); // WIP
 
@@ -48,6 +48,9 @@ private:
     
     // Command Allocator
     Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandAllocator;
+
+    // Command List
+    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> CommandList;
 
     // Swap Chain
     Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain;
