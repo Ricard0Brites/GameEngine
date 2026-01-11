@@ -132,6 +132,16 @@ void Engine::CreateRootSignature()
     DeviceRef->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&RootSignature));
 }
 
+void Engine::CreateVertexShader()
+{
+    D3DCompile(Shader.c_str(), Shader.length(), NULL, NULL, NULL, "VSMain", "vs_5_0", ShaderCompilationFlags, 0, &VertexShader, NULL);
+}
+
+void Engine::CreatePixelShader()
+{
+    D3DCompile(Shader.c_str(), Shader.length(), NULL, NULL, NULL, "PSMain", "ps_5_0", ShaderCompilationFlags, 0, &PixelShader, NULL);
+}
+
 #pragma endregion 
 
 void Engine::GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc)
