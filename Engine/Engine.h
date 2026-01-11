@@ -22,8 +22,7 @@ private:
     void CreateD3DDevice();
     void CreateCommandQueue();
     void CreateSwapChain();
-    void CreateDescriptorHeap(); // WIP
-    void CreateRendertarget(); // WIP
+    void CreateRendertargets();
     void CreateCommandAllocator(); // WIP
     void CreateRootSignature(); // WIP
     void CreateVertexShader(); // WIP
@@ -34,6 +33,8 @@ private:
     void CreateFence(); // WIP
 
     void GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc);
+    
+    #pragma region DirectX 12 References
 
     // Interface Factory
     Microsoft::WRL::ComPtr<IDXGIFactory7> Factory;
@@ -43,9 +44,15 @@ private:
 
     // Command Queue
     Microsoft::WRL::ComPtr<ID3D12CommandQueue> CommandQ; 
+    
+    // Command Allocator
+    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandAllocator;
 
-    // Swap Chain Interface
+    // Swap Chain
     Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain;
+
+    
+    #pragma endregion
 
     uint8_t ResX = 1280;
     uint8_t ResY = 720;

@@ -22,7 +22,8 @@ void Engine::InitializeD3D12()
     CreateD3DDevice();
     CreateCommandQueue();
     CreateSwapChain();
-
+    CreateRendertargets();
+    CreateCommandAllocator();
 }
 
 #pragma region DirectX 12
@@ -84,7 +85,35 @@ void Engine::CreateSwapChain()
     CurrentFrameIndex = SwapChain->GetCurrentBackBufferIndex();
 }
 
-#pragma endregion
+void Engine::CreateRendertargets()
+{
+    // Creates Description for 2 Render Target View Heaps (RTV)
+
+    D3D12_DESCRIPTOR_HEAP_DESC RTVDescHeapDesc = {};
+    RTVDescHeapDesc.NumDescriptors = 2; // create 2 heap descriptions
+    RTVDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // Define as RTV
+    RTVDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // Not GPU accessible
+    
+    // Create Heap
+    DeviceRef->CreateDescriptorHeap(&RTVDescHeapDesc, IID_PPV_ARGS(&RTVHeapDesc));
+
+    // Save Descriptor Size ( To Loop through multiple RTV Handles & swap chain indexing )
+    RTVDescriptorSize = DeviceRef->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); 
+
+
+    // Create Render Target Views
+    D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = RTVHeapDesc->GetCPUDescriptorHandleForHeapStart(); // Get First Descriptor Handle
+    
+    for (UINT n = 0; n < RTVHeapDesc->GetDesc().NumDescriptors; ++n)
+    {
+        SwapChain->GetBuffer(n, IID_PPV_ARGS(&RenderTargets[n])); // Get Handle to the buffer id **n** from the swap chain
+        DeviceRef->CreateRenderTargetView(RenderTargets[n].Get(), nullptr, RTVHandle); // Create RTV in the handle
+        RTVHandle.ptr += (1 * RTVDescriptorSize); // Move to the next Descriptor
+    }
+}
+
+
+#pragma endregion 
 
 void Engine::GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc)
 {
