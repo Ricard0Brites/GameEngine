@@ -112,6 +112,25 @@ void Engine::CreateRendertargets()
     }
 }
 
+void Engine::CreateCommandAllocator()
+{
+    DeviceRef->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&CommandAllocator));
+}
+
+void Engine::CreateRootSignature()
+{
+    D3D12_ROOT_SIGNATURE_DESC RootSignatureDesc;
+    RootSignatureDesc.NumParameters = 0;
+    RootSignatureDesc.pParameters = nullptr;
+    RootSignatureDesc.NumStaticSamplers = 0;
+    RootSignatureDesc.pStaticSamplers = nullptr;
+    RootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    D3D12SerializeRootSignature(&RootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+    DeviceRef->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&RootSignature));
+}
 
 #pragma endregion 
 

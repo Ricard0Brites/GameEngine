@@ -23,8 +23,8 @@ private:
     void CreateCommandQueue();
     void CreateSwapChain();
     void CreateRendertargets();
-    void CreateCommandAllocator(); // WIP
-    void CreateRootSignature(); // WIP
+    void CreateCommandAllocator();
+    void CreateRootSignature();
     void CreateVertexShader(); // WIP
     void CreatePixelShader(); // WIP
     void CreatePSO(); // WIP
@@ -51,6 +51,13 @@ private:
     // Swap Chain
     Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain;
 
+    //Render Target View
+    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RTVHeapDesc;
+    Microsoft::WRL::ComPtr<ID3D12Resource> RenderTargets[2];
+    UINT RTVDescriptorSize;
+
+    // Root Signature
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignature;
     
     #pragma endregion
 
