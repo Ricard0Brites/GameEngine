@@ -1,3 +1,3 @@
 # Adaptive Triangle
 
-This branches' objective is to render the triangle in such a way that resising the window doesnt change the triangles location nor deforms it.
+This branches' objective is to render the triangle in such a way that resizing the window doesn't deform nor modify the triangles location.
