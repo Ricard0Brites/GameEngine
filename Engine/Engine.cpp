@@ -142,6 +142,38 @@ void Engine::CreatePixelShader()
     D3DCompile(Shader.c_str(), Shader.length(), NULL, NULL, NULL, "PSMain", "ps_5_0", ShaderCompilationFlags, 0, &PixelShader, NULL);
 }
 
+void Engine::CreatePSO()
+{
+    // in an actual project this would be material dependent but we are hard coding it here
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+    };
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
+    psoDesc.pRootSignature = RootSignature.Get(); 
+    psoDesc.VS.pShaderBytecode = VertexShader->GetBufferPointer(); 
+    psoDesc.VS.BytecodeLength = VertexShader->GetBufferSize();
+    psoDesc.PS.pShaderBytecode = PixelShader->GetBufferPointer();
+    psoDesc.PS.BytecodeLength = PixelShader->GetBufferSize(); 
+    psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; 
+    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; 
+    psoDesc.BlendState.AlphaToCoverageEnable = FALSE; 
+    psoDesc.BlendState.IndependentBlendEnable = FALSE;
+    psoDesc.BlendState.RenderTarget[0].BlendEnable = FALSE;
+    psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; 
+    psoDesc.DepthStencilState.DepthEnable = FALSE; 
+    psoDesc.DepthStencilState.StencilEnable = FALSE; 
+    psoDesc.SampleMask = UINT_MAX; // opacity 1?
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; 
+    psoDesc.NumRenderTargets = 1; 
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; 
+    psoDesc.SampleDesc.Count = 1;
+    DeviceRef->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)); // Create PSO
+}
+
 #pragma endregion 
 
 void Engine::GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc)

@@ -30,7 +30,7 @@ private:
     void CreateRootSignature();
     void CreateVertexShader();
     void CreatePixelShader();
-    void CreatePSO(); // WIP
+    void CreatePSO();
     void CreateCommandsList(); // WIP
     void CreateVertexBuffer(); // WIP
     void CreateFence(); // WIP
@@ -87,6 +87,8 @@ private:
         UINT ShaderCompilationFlags = 0;
     #endif
 
+    // Pipeline
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> PSO;
     #pragma endregion
 
     uint8_t ResX = 1280;
