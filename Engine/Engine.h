@@ -14,6 +14,7 @@ public:
     void Launch();
     void Quit();
 
+    
 private:
     ~Engine();
     bool IsRunning = false;
@@ -32,10 +33,12 @@ private:
     void CreatePixelShader();
     void CreatePSO();
     void CreateCommandsList();
-    void CreateVertexBuffer(); // WIP
-    void CreateFence(); // WIP
+    void CreateVertexBuffer();
+    void CreateFence();
+    void OnRender();
 
-    void GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc);
+    void WaitForPreviousFrame();
+    void GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3& Desc);
 
     // Interface Factory
     Microsoft::WRL::ComPtr<IDXGIFactory7> Factory;
@@ -84,18 +87,27 @@ private:
         }
     )";
 
-    #if defined(_DEBUG)
-        UINT ShaderCompilationFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-    #else
-        UINT ShaderCompilationFlags = 0;
-    #endif
+    UINT ShaderCompilationFlags = 0;
 
     // Pipeline
     Microsoft::WRL::ComPtr<ID3D12PipelineState> PSO;
+    
+    // Vertex Buffer
+    Microsoft::WRL::ComPtr<ID3D12Resource> VertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW VertexBufferView;
+
+    // Fence
+    Microsoft::WRL::ComPtr<ID3D12Fence> Fence;
+    UINT FenceValue;
+    HANDLE FenceEvent;
+
+    D3D12_VIEWPORT Viewport;
+    D3D12_RECT ScissorRect;
+
     #pragma endregion
 
-    uint8_t ResX = 1280;
-    uint8_t ResY = 720;
+    UINT ResX = 1280;
+    UINT ResY = 720;
 
     UINT CurrentFrameIndex = 0;
 };
