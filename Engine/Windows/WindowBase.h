@@ -8,24 +8,23 @@ static int WindowIDRunningCount = 0; // No need to handle data races bc win32 by
 class WindowBase
 {
 public:
-	WindowBase(const WCHAR* InWindowTitle);
+	WindowBase(const std::wstring &InWindowTitle);
 	~WindowBase();
 
 	/* Triggered Right Before Destruction */
 	Delegate<> OnDestroy;
 
-	/* Triggered on window event */
-	Delegate<UINT> OnMessageReceived;
-
 protected:
 	void PumpMessages();
+	virtual void OnMessageReceived(MSG InMessage) {};
+	virtual void OnWindowResize(int X, int Y) {};
 	HWND* GetWindowHandle() { return &WindowHandle;  }
 
 private:
 	bool RegisterWindowClass();
 	bool CreateWindowInstance();
 
-	const WCHAR* WindowTitle, *ClassName;
+	std::wstring ClassName, WindowTitle;
 
 	HWND WindowHandle = nullptr;
 };

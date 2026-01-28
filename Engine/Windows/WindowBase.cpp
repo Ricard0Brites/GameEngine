@@ -1,5 +1,20 @@
 #include "WindowBase.h"
 #include <string>
+#include <list>
+
+
+Delegate<int,int> OnWindowResizeDelegate;
+bool WindowSizeDirty = false;
+
+void BroadcastWindowSize(const HWND &hWnd)
+{
+    // Send Window Resize Event
+    RECT r;
+    if (GetWindowRect(hWnd, &r))
+        OnWindowResizeDelegate.Execute(r.right - r.left, r.bottom - r.top);
+
+    WindowSizeDirty = false;
+}
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -12,16 +27,37 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+    case WM_SIZE:
+        WindowSizeDirty = true;
+        
+        // Handles Maximize and restore
+        if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
+            BroadcastWindowSize(hWnd);
+
+        // Handles Fullscreen 
+        QUERY_USER_NOTIFICATION_STATE qry;
+        SHQueryUserNotificationState(&qry);
+        if (qry == (QUNS_RUNNING_D3D_FULL_SCREEN | QUNS_BUSY | QUNS_PRESENTATION_MODE))
+            BroadcastWindowSize(hWnd);
+
+        break;
+    case WM_EXITSIZEMOVE:
+        if (WindowSizeDirty)
+        {
+            BroadcastWindowSize(hWnd);
+        }
+        break;
     }
 
-    return DefWindowProc(hWnd, msg, wParam, lParam);
+    return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-WindowBase::WindowBase(const WCHAR *InWindowTitle):
+WindowBase::WindowBase(const std::wstring& InWindowTitle) :
     WindowTitle(InWindowTitle)
 {
-    std::wstring cache = L"WindowClass_" + std::to_wstring(WindowIDRunningCount++);
-    ClassName = cache.c_str();
+    ClassName = L"WindowClass_";
+
+    OnWindowResizeDelegate.Bind(this, &WindowBase::OnWindowResize);
 
     RegisterWindowClass();
     CreateWindowInstance();
@@ -38,8 +74,8 @@ void WindowBase::PumpMessages()
     MSG msg{};
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
     {
-        OnMessageReceived.Execute(msg.message); // Bubble Event
-        
+        OnMessageReceived(msg);
+
         // Standard Behavior
         if (msg.message == WM_QUIT)
         {
@@ -71,7 +107,7 @@ bool WindowBase::RegisterWindowClass()
     WindowClassEX.hIcon = LoadIcon(0, IDI_APPLICATION); // Application Icon
     WindowClassEX.hIconSm = WindowClassEX.hIcon; // Application Icon (Tray/Taskbar)
 
-    WindowClassEX.lpszClassName = ClassName;
+    WindowClassEX.lpszClassName = ClassName.c_str();
     WindowClassEX.lpszMenuName = nullptr; // Remove Menus
 
     bool res = RegisterClassEx(&WindowClassEX);
@@ -86,8 +122,8 @@ bool WindowBase::CreateWindowInstance()
 {
     WindowHandle = CreateWindowExW(
         0,
-        ClassName,
-        WindowTitle,
+        ClassName.c_str(),
+        WindowTitle.c_str(),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,

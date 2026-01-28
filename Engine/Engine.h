@@ -14,30 +14,38 @@ public:
     void Launch();
     void Quit();
 
-    
+    void TestFunc();
 private:
     ~Engine();
     bool IsRunning = false;
 
+    virtual void OnMessageReceived(MSG InMessage);
     
     #pragma region DirectX 12
 
     void InitializeD3D12();
     void CreateD3DDevice();
+
+    //Pipeline State Object (Where everything links)
+    void CreatePSO();
+
+    //Commands
     void CreateCommandQueue();
-    void CreateSwapChain();
-    void CreateRendertargets();
     void CreateCommandAllocator();
-    void CreateRootSignature();
+    void CreateCommandsList();
+
+    //Shaders
     void CreateVertexShader();
     void CreatePixelShader();
-    void CreatePSO();
-    void CreateCommandsList();
+
+    void CreateSwapChain();
+    void CreateRendertargets();
+    void CreateRootSignature();
     void CreateVertexBuffer();
     void CreateFence();
-    void OnRender();
 
-    void WaitForPreviousFrame();
+    void OnRender();
+    void AwaitFrameRender();
     void GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3& Desc);
 
     // Interface Factory
@@ -110,4 +118,7 @@ private:
     UINT ResY = 720;
 
     UINT CurrentFrameIndex = 0;
+protected:
+    void OnWindowResize(int X, int Y) override;
+
 };

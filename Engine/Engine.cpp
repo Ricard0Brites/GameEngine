@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <d3d12sdklayers.h>
 
-
 using namespace Microsoft::WRL;
 
 struct Vertex
@@ -14,7 +13,6 @@ struct Vertex
     float color[4];
 };
 
-
 Engine::Engine(const WCHAR* InWindowTitle)
     : WindowBase(InWindowTitle)
 {
@@ -23,6 +21,20 @@ Engine::Engine(const WCHAR* InWindowTitle)
 
 Engine::~Engine()
 {
+}
+
+void Engine::OnMessageReceived(MSG InMessage)
+{
+    //std::cout << InMessage.message << std::endl;
+    if (InMessage.message == WM_SIZE)
+    {        
+        RECT WR;
+        if (GetWindowRect(InMessage.hwnd, &WR))
+        {
+            ResX = WR.right;
+            ResY = WR.bottom;
+        }
+    }
 }
 
 void Engine::InitializeD3D12()
@@ -38,16 +50,20 @@ void Engine::InitializeD3D12()
     ScissorRect.bottom = static_cast<LONG>(ResY);
 
     CreateD3DDevice();
+
     CreateCommandQueue();
+    CreateCommandAllocator();
+    CreateCommandsList();
+
+    CreateVertexShader();
+    CreateVertexBuffer();
+    
+    CreatePixelShader();
+
     CreateSwapChain();
     CreateRendertargets();
-    CreateCommandAllocator();
     CreateRootSignature();
-    CreateVertexShader();
-    CreatePixelShader();
     CreatePSO();
-    CreateCommandsList();
-    CreateVertexBuffer();
     CreateFence();
 }
 
@@ -77,6 +93,7 @@ void Engine::CreateD3DDevice()
     D3D12CreateDevice(AdapterInfo.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&DeviceRef));
 }
 
+// Commands
 void Engine::CreateCommandQueue()
 {
     // Create Queue Description
@@ -90,82 +107,18 @@ void Engine::CreateCommandQueue()
     DeviceRef->CreateCommandQueue(&QueueDesc, IID_PPV_ARGS(&CommandQ)); 
 }
 
-void Engine::CreateSwapChain()
-{
-    // Create Swap Chain
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-    swapChainDesc.BufferCount = 2;
-    swapChainDesc.Width = ResX; // Window Resolution X
-    swapChainDesc.Height = ResY; // Window Resolution Y
-    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    swapChainDesc.SampleDesc.Count = 1;
-
-    const HWND& WindowRef = *GetWindowHandle();
-
-    ComPtr<IDXGISwapChain1> TempSwapChain;
-
-    Factory->CreateSwapChainForHwnd(
-        CommandQ.Get(),
-        WindowRef,
-        &swapChainDesc,
-        nullptr,
-        nullptr,
-        &TempSwapChain
-    );
-    Factory->MakeWindowAssociation(WindowRef, DXGI_MWA_NO_ALT_ENTER);
-    SwapChain = (IDXGISwapChain4*)TempSwapChain.Get();
-    CurrentFrameIndex = SwapChain->GetCurrentBackBufferIndex();
-}
-
-void Engine::CreateRendertargets()
-{
-    // Creates Description for 2 Render Target View Heaps (RTV)
-
-    D3D12_DESCRIPTOR_HEAP_DESC RTVDescHeapDesc = {};
-    RTVDescHeapDesc.NumDescriptors = 2; // create 2 heap descriptions
-    RTVDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // Define as RTV
-    RTVDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // Not GPU accessible
-    
-    // Create Heap
-    DeviceRef->CreateDescriptorHeap(&RTVDescHeapDesc, IID_PPV_ARGS(&RTVHeapDesc));
-
-    // Save Descriptor Size ( To Loop through multiple RTV Handles & swap chain indexing )
-    RTVDescriptorSize = DeviceRef->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); 
-
-
-    // Create Render Target Views
-    D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = RTVHeapDesc->GetCPUDescriptorHandleForHeapStart(); // Get First Descriptor Handle
-    
-    for (UINT n = 0; n < RTVHeapDesc->GetDesc().NumDescriptors; ++n)
-    {
-        SwapChain->GetBuffer(n, IID_PPV_ARGS(&RenderTargets[n])); // Get Handle to the buffer id **n** from the swap chain
-        DeviceRef->CreateRenderTargetView(RenderTargets[n].Get(), nullptr, RTVHandle); // Create RTV in the handle
-        RTVHandle.ptr += (1 * RTVDescriptorSize); // Move to the next Descriptor
-    }
-}
-
 void Engine::CreateCommandAllocator()
 {
     DeviceRef->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&CommandAllocator));
 }
 
-void Engine::CreateRootSignature()
+void Engine::CreateCommandsList()
 {
-    D3D12_ROOT_SIGNATURE_DESC RootSignatureDesc;
-    RootSignatureDesc.NumParameters = 0;
-    RootSignatureDesc.pParameters = nullptr;
-    RootSignatureDesc.NumStaticSamplers = 0;
-    RootSignatureDesc.pStaticSamplers = nullptr;
-    RootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-    ComPtr<ID3DBlob> signature;
-    ComPtr<ID3DBlob> error;
-    D3D12SerializeRootSignature(&RootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
-    DeviceRef->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&RootSignature));
+    DeviceRef->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandAllocator.Get(), PSO.Get(), IID_PPV_ARGS(&CommandList));
+    CommandList->Close();
 }
 
+//Shaders
 void Engine::CreateVertexShader()
 {
     ComPtr<ID3D10Blob> error;
@@ -178,58 +131,6 @@ void Engine::CreateVertexShader()
         }
         __debugbreak();
     }
-}
-
-void Engine::CreatePixelShader()
-{
-    ComPtr<ID3D10Blob> error;
-    HRESULT hr = D3DCompile(Shader.c_str(), Shader.length(), NULL, NULL, NULL, "PSMain", "ps_5_0", ShaderCompilationFlags, 0, &PixelShader, &error);
-    if (FAILED(hr))
-    {
-        if (error)
-        {
-            OutputDebugStringA(static_cast<char*>(error->GetBufferPointer()));
-        }
-        __debugbreak();
-    }
-}
-
-void Engine::CreatePSO()
-{
-    // in an actual project this would be material dependent but we are hard coding it here
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-    };
-
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
-    psoDesc.pRootSignature = RootSignature.Get(); 
-    psoDesc.VS.pShaderBytecode = VertexShader->GetBufferPointer(); 
-    psoDesc.VS.BytecodeLength = VertexShader->GetBufferSize();
-    psoDesc.PS.pShaderBytecode = PixelShader->GetBufferPointer();
-    psoDesc.PS.BytecodeLength = PixelShader->GetBufferSize(); 
-    psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; 
-    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; 
-    psoDesc.BlendState.AlphaToCoverageEnable = FALSE; 
-    psoDesc.BlendState.IndependentBlendEnable = FALSE;
-    psoDesc.BlendState.RenderTarget[0].BlendEnable = FALSE;
-    psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; 
-    psoDesc.DepthStencilState.DepthEnable = FALSE; 
-    psoDesc.DepthStencilState.StencilEnable = FALSE; 
-    psoDesc.SampleMask = UINT_MAX; // opacity 1?
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; 
-    psoDesc.NumRenderTargets = 1; 
-    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; 
-    psoDesc.SampleDesc.Count = 1;
-    DeviceRef->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)); // Create PSO
-}
-
-void Engine::CreateCommandsList()
-{
-    DeviceRef->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandAllocator.Get(), PSO.Get(), IID_PPV_ARGS(&CommandList));
-    CommandList->Close();
 }
 
 void Engine::CreateVertexBuffer()
@@ -284,6 +185,124 @@ void Engine::CreateVertexBuffer()
     
 }
 
+void Engine::CreatePixelShader()
+{
+    ComPtr<ID3D10Blob> error;
+    HRESULT hr = D3DCompile(Shader.c_str(), Shader.length(), NULL, NULL, NULL, "PSMain", "ps_5_0", ShaderCompilationFlags, 0, &PixelShader, &error);
+    if (FAILED(hr))
+    {
+        if (error)
+        {
+            OutputDebugStringA(static_cast<char*>(error->GetBufferPointer()));
+        }
+        __debugbreak();
+    }
+}
+
+
+void Engine::CreateSwapChain()
+{
+    // Create Swap Chain
+    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+    swapChainDesc.BufferCount = 2;
+    swapChainDesc.Width = ResX; // Window Resolution X
+    swapChainDesc.Height = ResY; // Window Resolution Y
+    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapChainDesc.SampleDesc.Count = 1;
+
+    const HWND& WindowRef = *GetWindowHandle();
+
+    ComPtr<IDXGISwapChain1> TempSwapChain;
+
+    Factory->CreateSwapChainForHwnd(
+        CommandQ.Get(),
+        WindowRef,
+        &swapChainDesc,
+        nullptr,
+        nullptr,
+        &TempSwapChain
+    );
+    Factory->MakeWindowAssociation(WindowRef, 0);
+    SwapChain = (IDXGISwapChain4*)TempSwapChain.Get();
+    CurrentFrameIndex = SwapChain->GetCurrentBackBufferIndex();
+}
+
+void Engine::CreateRendertargets()
+{
+    // Creates Description for 2 Render Target View Heaps (RTV)
+
+    D3D12_DESCRIPTOR_HEAP_DESC RTVDescHeapDesc = {};
+    RTVDescHeapDesc.NumDescriptors = 2; // create 2 heap descriptions
+    RTVDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // Define as RTV
+    RTVDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // Not GPU accessible
+    
+    // Create Heap
+    DeviceRef->CreateDescriptorHeap(&RTVDescHeapDesc, IID_PPV_ARGS(&RTVHeapDesc));
+
+    // Save Descriptor Size ( To Loop through multiple RTV Handles & swap chain indexing )
+    RTVDescriptorSize = DeviceRef->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); 
+
+
+    // Create Render Target Views
+    D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = RTVHeapDesc->GetCPUDescriptorHandleForHeapStart(); // Get First Descriptor Handle
+    
+    for (UINT n = 0; n < RTVHeapDesc->GetDesc().NumDescriptors; ++n)
+    {
+        SwapChain->GetBuffer(n, IID_PPV_ARGS(&RenderTargets[n])); // Get Handle to the buffer id **n** from the swap chain
+        DeviceRef->CreateRenderTargetView(RenderTargets[n].Get(), nullptr, RTVHandle); // Create RTV in the handle
+        RTVHandle.ptr += (1 * RTVDescriptorSize); // Move to the next Descriptor
+    }
+}
+
+void Engine::CreateRootSignature()
+{
+    D3D12_ROOT_SIGNATURE_DESC RootSignatureDesc;
+    RootSignatureDesc.NumParameters = 0;
+    RootSignatureDesc.pParameters = nullptr;
+    RootSignatureDesc.NumStaticSamplers = 0;
+    RootSignatureDesc.pStaticSamplers = nullptr;
+    RootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    D3D12SerializeRootSignature(&RootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+    DeviceRef->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&RootSignature));
+}
+
+void Engine::CreatePSO()
+{
+    // in an actual project this would be material dependent but we are hard coding it here
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+    };
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
+    psoDesc.pRootSignature = RootSignature.Get(); 
+    psoDesc.VS.pShaderBytecode = VertexShader->GetBufferPointer(); 
+    psoDesc.VS.BytecodeLength = VertexShader->GetBufferSize();
+    psoDesc.PS.pShaderBytecode = PixelShader->GetBufferPointer();
+    psoDesc.PS.BytecodeLength = PixelShader->GetBufferSize(); 
+    psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; 
+    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; 
+    psoDesc.BlendState.AlphaToCoverageEnable = FALSE; 
+    psoDesc.BlendState.IndependentBlendEnable = FALSE;
+    psoDesc.BlendState.RenderTarget[0].BlendEnable = FALSE;
+    psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; 
+    psoDesc.DepthStencilState.DepthEnable = FALSE; 
+    psoDesc.DepthStencilState.StencilEnable = FALSE; 
+    psoDesc.SampleMask = UINT_MAX; // opacity 1?
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; 
+    psoDesc.NumRenderTargets = 1; 
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; 
+    psoDesc.SampleDesc.Count = 1;
+    DeviceRef->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)); // Create PSO
+}
+
 void Engine::CreateFence()
 {
     DeviceRef->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(Fence), &Fence);
@@ -309,7 +328,6 @@ void Engine::OnRender()
     renderTargetBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     renderTargetBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     CommandList->ResourceBarrier(1, &renderTargetBarrier);
-
 
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = RTVHeapDesc->GetCPUDescriptorHandleForHeapStart();
     rtvHandle.ptr += (CurrentFrameIndex * RTVDescriptorSize);
@@ -341,10 +359,10 @@ void Engine::OnRender()
     // Present the frame.
     SwapChain->Present(1, 0);
 
-    WaitForPreviousFrame();
+    AwaitFrameRender();
 }
 
-void Engine::WaitForPreviousFrame()
+void Engine::AwaitFrameRender()
 {
     // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
     // This is code implemented as such for simplicity. The D3D12HelloFrameBuffering
@@ -352,14 +370,14 @@ void Engine::WaitForPreviousFrame()
     // utilization.
 
     // Signal and increment the fence value.
-    const UINT64 fence = FenceValue;
-    CommandQ->Signal(Fence.Get(), fence);
+    const UINT64 FenceValueCache = FenceValue;
+    CommandQ->Signal(Fence.Get(), FenceValueCache);
     FenceValue++;
 
     // Wait until the previous frame is finished.
-    if (Fence->GetCompletedValue() < fence)
+    if (Fence->GetCompletedValue() < FenceValueCache)
     {
-        Fence->SetEventOnCompletion(fence, FenceEvent);
+        Fence->SetEventOnCompletion(FenceValueCache, FenceEvent);
         WaitForSingleObject(FenceEvent, INFINITE);
     }
 
@@ -371,6 +389,15 @@ void Engine::WaitForPreviousFrame()
 void Engine::GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3 &Desc)
 {
     Adapter->GetDesc3(&Desc);
+}
+
+void Engine::OnWindowResize(int X, int Y)
+{
+    ResX = X;
+    ResY = Y;
+
+    using namespace std;
+    cout << "Resizing X=" << X << " Y=" << Y << endl;
 }
 
 void Engine::Launch()
@@ -389,5 +416,10 @@ void Engine::Launch()
 void Engine::Quit()
 {
     IsRunning = false;
+}
+
+void Engine::TestFunc()
+{
+    std::cout << "TEST FUNC" << std::endl;
 }
 
