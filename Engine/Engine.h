@@ -19,7 +19,7 @@ private:
     ~Engine();
     bool IsRunning = false;
 
-    virtual void OnMessageReceived(MSG InMessage);
+    void OnMessageReceived(MSG InMessage) override;
     
     #pragma region DirectX 12
 

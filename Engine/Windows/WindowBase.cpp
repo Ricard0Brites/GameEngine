@@ -20,33 +20,49 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
-    case WM_CLOSE:
-        DestroyWindow(hWnd);
-        break;
+        case WM_CLOSE:
+            DestroyWindow(hWnd);
+            break;
 
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    case WM_SIZE:
-        WindowSizeDirty = true;
-        
-        // Handles Maximize and restore
-        if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
-            BroadcastWindowSize(hWnd);
-
-        // Handles Fullscreen 
-        QUERY_USER_NOTIFICATION_STATE qry;
-        SHQueryUserNotificationState(&qry);
-        if (qry == (QUNS_RUNNING_D3D_FULL_SCREEN | QUNS_BUSY | QUNS_PRESENTATION_MODE))
-            BroadcastWindowSize(hWnd);
-
-        break;
-    case WM_EXITSIZEMOVE:
-        if (WindowSizeDirty)
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+        case WM_SIZE:
         {
-            BroadcastWindowSize(hWnd);
+            // Mark dirty for any size-affecting change
+            if (wParam != SIZE_MINIMIZED)
+            {
+                WindowSizeDirty = true;
+            }
+            break;
         }
-        break;
+
+        case WM_EXITSIZEMOVE:
+        {
+            // Fired once when user finishes free resize or move
+            if (WindowSizeDirty)
+            {
+                BroadcastWindowSize(hWnd);
+                WindowSizeDirty = false;
+            }
+            break;
+        }
+
+        case WM_SYSCOMMAND:
+        {
+            switch (wParam & 0xFFF0)
+            {
+                case SC_MAXIMIZE:
+                case SC_RESTORE:
+                {
+                    LRESULT Res = DefWindowProcW(hWnd, msg, wParam, lParam);
+                    BroadcastWindowSize(hWnd);
+                    WindowSizeDirty = false;
+                    return Res;
+                }
+            }
+            break;
+        }
     }
 
     return DefWindowProcW(hWnd, msg, wParam, lParam);
