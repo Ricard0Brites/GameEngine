@@ -18,30 +18,27 @@ protected:
 	FObjectData* ObjectData = nullptr;
 };
 
-template<typename T>
-concept DerivedFromObject = std::is_base_of_v(Object, T);
-
 struct Object::FObjectData
 {
 public:
-#pragma region Getters
+	#pragma region Getters
 
-	const std::string& GetDisplayName();
-	Object* GetOwner();
-	const bool& GetIsPendingKill();
+		const std::string& GetDisplayName();
+		Object* GetOwner();
+		const bool& GetIsPendingKill();
 
-	// TODO - Add as needed
+		// TODO - Add as needed
 
-#pragma endregion
+	#pragma endregion
 
-#pragma region Setters
-	void SetDisplayName(const char* InName);
-	void SetOwner(Object *InOwner);
-	void SetPendingKill();
+	#pragma region Setters
+		void SetDisplayName(const char* InName);
+		void SetOwner(Object *InOwner);
+		void SetPendingKill();
+	#pragma endregion
 
-	template<DerivedFromObject T>
+	template<typename T> requires std::is_base_of_v<Object, T>
 	T* CreateChildOfClass();
-#pragma endregion
 
 private:
 	// Name of the object
