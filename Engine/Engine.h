@@ -44,9 +44,11 @@ private:
     void CreateVertexBuffer();
     void CreateFence();
 
-    void OnRender();
+    void Render();
     void AwaitFrameRender();
     void GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& Adapter, DXGI_ADAPTER_DESC3& Desc);
+
+    void ResizeWindow();
 
     // Interface Factory
     Microsoft::WRL::ComPtr<IDXGIFactory7> Factory;
@@ -113,6 +115,8 @@ private:
     D3D12_RECT ScissorRect;
 
     #pragma endregion
+
+    Delegate<> OnFrameRendered;
 
     UINT ResX = 1280;
     UINT ResY = 720;

@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdio>
 #include <d3d12sdklayers.h>
+#include <wrl/client.h>
 
 using namespace Microsoft::WRL;
 
@@ -27,12 +28,10 @@ void Engine::OnMessageReceived(MSG InMessage)
 {
     //std::cout << InMessage.message << std::endl;
     if (InMessage.message == WM_SIZE)
-    {        
-        RECT WR;
-        if (GetWindowRect(InMessage.hwnd, &WR))
+    {
+        if (InMessage.wParam != SIZE_MINIMIZED)
         {
-            ResX = WR.right;
-            ResY = WR.bottom;
+            OnWindowResize(LOWORD(InMessage.lParam), HIWORD(InMessage.lParam));
         }
     }
 }
@@ -233,21 +232,26 @@ void Engine::CreateRendertargets()
 {
     // Creates Description for 2 Render Target View Heaps (RTV)
 
-    D3D12_DESCRIPTOR_HEAP_DESC RTVDescHeapDesc = {};
-    RTVDescHeapDesc.NumDescriptors = 2; // create 2 heap descriptions
-    RTVDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // Define as RTV
-    RTVDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // Not GPU accessible
-    
     // Create Heap
-    DeviceRef->CreateDescriptorHeap(&RTVDescHeapDesc, IID_PPV_ARGS(&RTVHeapDesc));
+    if (!RTVHeapDesc)
+    {
+        // Heap Descriptor Description
+        D3D12_DESCRIPTOR_HEAP_DESC RTVDescHeapDesc = {};
+        RTVDescHeapDesc.NumDescriptors = 2; // create 2 heap descriptions
+        RTVDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // Define as RTV
+        RTVDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // Not GPU accessible
+    
+        //Create Descriptor Heap
+        DeviceRef->CreateDescriptorHeap(&RTVDescHeapDesc, IID_PPV_ARGS(&RTVHeapDesc));
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = RTVHeapDesc->GetCPUDescriptorHandleForHeapStart(); // Get First RTV Handle
 
     // Save Descriptor Size ( To Loop through multiple RTV Handles & swap chain indexing )
     RTVDescriptorSize = DeviceRef->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); 
 
 
     // Create Render Target Views
-    D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = RTVHeapDesc->GetCPUDescriptorHandleForHeapStart(); // Get First Descriptor Handle
-    
     for (UINT n = 0; n < RTVHeapDesc->GetDesc().NumDescriptors; ++n)
     {
         SwapChain->GetBuffer(n, IID_PPV_ARGS(&RenderTargets[n])); // Get Handle to the buffer id **n** from the swap chain
@@ -310,7 +314,7 @@ void Engine::CreateFence()
     FenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 }
 
-void Engine::OnRender()
+void Engine::Render()
 {
     // Record all the commands we need to render the scene into the command list.
     CommandAllocator->Reset();
@@ -357,7 +361,7 @@ void Engine::OnRender()
     CommandQ->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
     // Present the frame.
-    SwapChain->Present(1, 0);
+    HRESULT A = SwapChain->Present(1, 0);
 
     AwaitFrameRender();
 }
@@ -382,6 +386,7 @@ void Engine::AwaitFrameRender()
     }
 
     CurrentFrameIndex = SwapChain->GetCurrentBackBufferIndex();
+    OnFrameRendered.Execute();
 }
 
 #pragma endregion 
@@ -391,13 +396,59 @@ void Engine::GetAdapterInformation(const Microsoft::WRL::ComPtr<IDXGIAdapter4>& 
     Adapter->GetDesc3(&Desc);
 }
 
+void Engine::ResizeWindow()
+{
+    //Resizes Window
+    const int RTVBufferLen = sizeof(RenderTargets) / sizeof(RenderTargets[0]);
+    // Delete RTV related to the swapchain
+    for (int i = 0; i < RTVBufferLen; ++i)
+    {
+        ComPtr<ID3D12Resource> *RTV = &RenderTargets[i];
+
+        RTV->Reset();
+    }
+
+    // Resize swapchainn heaps
+    SwapChain->ResizeBuffers(
+    RTVBufferLen,
+    ResX,
+    ResY,
+    DXGI_FORMAT_R8G8B8A8_UNORM,
+    DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH
+    );
+    
+    CurrentFrameIndex = 0;
+
+    CreateRendertargets();
+    CreateVertexBuffer();
+    
+
+    //unbind
+    OnFrameRendered.Remove(this, &Engine::ResizeWindow);
+}
+
 void Engine::OnWindowResize(int X, int Y)
 {
+    if (ResX == X && ResY == Y)
+    {
+        return;
+    }
+
     ResX = X;
     ResY = Y;
 
-    using namespace std;
-    cout << "Resizing X=" << X << " Y=" << Y << endl;
+    if (ResY == 0)
+    {
+        ResY = 1;
+    }
+
+    Viewport.Width = static_cast<float>(ResX);
+    Viewport.Height = static_cast<float>(ResY);
+    ScissorRect.right = static_cast<LONG>(ResX);
+    ScissorRect.bottom = static_cast<LONG>(ResY);
+
+    //Requesting Window Size Update
+    OnFrameRendered.Bind(this, &Engine::ResizeWindow);
 }
 
 void Engine::Launch()
@@ -408,7 +459,7 @@ void Engine::Launch()
     while (IsRunning)
     {
         PumpMessages();
-        OnRender();
+        Render();
     }
 
 }

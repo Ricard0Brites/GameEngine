@@ -34,6 +34,30 @@ public:
         Entries.push_back(new Entry<T>(obj, method));
     }
 
+	template<typename T>
+	void Remove(T* obj, void (T::* method)(Args...))
+	{
+		Entries.erase(std::remove_if(Entries.begin(),Entries.end(),[&](BaseEntry* base)
+			{
+                Entry<T> *e = dynamic_cast<Entry<T>*>(base);
+				if (!e) return false;
+
+				if (e->Object == obj && e->Method == method)
+				{
+					delete e;
+					return true;
+				}
+				return false;
+			}),
+			Entries.end());
+	}
+    
+    void Clear()
+    {
+        Entries.clear();
+    }
+
+
     void Execute(Args... args)
     {
         for (auto* e : Entries)
