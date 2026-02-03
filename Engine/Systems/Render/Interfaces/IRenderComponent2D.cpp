@@ -1,8 +1,8 @@
-#include "IRenderComponent.h"
+#include "IRenderComponent2D.h"
 #include <string>
 #include "Core/DataTypes.h"
 
-struct IRenderComponent::FSprite
+struct IRenderComponent2D::FSprite
 {
 	std::string Path = "";
 
@@ -12,7 +12,7 @@ struct IRenderComponent::FSprite
 
 };
 
-IRenderComponent::IRenderComponent(const char* SpritePath)
+IRenderComponent2D::IRenderComponent2D(const char* SpritePath)
 {
 	if (SpritePath)
 	{
@@ -21,7 +21,7 @@ IRenderComponent::IRenderComponent(const char* SpritePath)
 	}
 }
 
-IRenderComponent::~IRenderComponent()
+IRenderComponent2D::~IRenderComponent2D()
 {
 	if (SpriteRef)
 	{
@@ -30,7 +30,7 @@ IRenderComponent::~IRenderComponent()
 	}
 }
 
-const IRenderComponent::FSprite& IRenderComponent::GetSprite()
+const IRenderComponent2D::FSprite& IRenderComponent2D::GetSprite()
 {
 	return *SpriteRef;
 }

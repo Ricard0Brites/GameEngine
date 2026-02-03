@@ -36,13 +36,16 @@
     <ClCompile Include="Systems\Render\RenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent.cpp">
+    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Object\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,7 +77,7 @@
     <ClInclude Include="Systems\Render\RenderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent.h">
+    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Systems\Render\RenderTypes.h">
@@ -84,6 +87,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Systems\Collision\CollisionSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\IO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameplayStatics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

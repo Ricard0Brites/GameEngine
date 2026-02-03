@@ -1,13 +1,13 @@
 #pragma once
 #include "Core/Core.h"
 
-class ENGINE_API IRenderComponent
+class ENGINE_API IRenderComponent2D
 {
 public:
-	IRenderComponent() = delete;
+	IRenderComponent2D() = delete;
 	
-	IRenderComponent(const char* SpritePath);
-	~IRenderComponent();
+	IRenderComponent2D(const char* SpritePath);
+	~IRenderComponent2D();
 
 
 	struct FSprite;

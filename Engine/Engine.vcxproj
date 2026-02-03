@@ -91,9 +91,10 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp" />
-    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent.cpp" />
+    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent2D.cpp" />
     <ClCompile Include="Object\Actor.cpp" />
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp" />
+    <ClCompile Include="Systems\Render\Interfaces\IRenderComponent3D.cpp" />
     <ClCompile Include="Systems\Render\RenderSystem.cpp" />
     <ClCompile Include="Windows\WindowBase.cpp" />
   </ItemGroup>
@@ -103,11 +104,14 @@
     <ClInclude Include="Core\Delegate.h" />
     <ClInclude Include="Core\EngineStatics.h" />
     <ClInclude Include="Core\ThreadedTask.hpp" />
+    <ClInclude Include="GameplayStatics.hpp" />
+    <ClInclude Include="IO\IO.h" />
     <ClInclude Include="Systems\Collision\CollisionSystem.h" />
-    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent.h" />
+    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent2D.h" />
     <ClInclude Include="Object\Actor.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Systems\Physics\PhysicsSystem.h" />
+    <ClInclude Include="Systems\Render\Interfaces\IRenderComponent3D.h" />
     <ClInclude Include="Systems\Render\RenderSystem.h" />
     <ClInclude Include="Systems\Render\RenderTypes.h" />
     <ClInclude Include="Windows\WindowBase.h" />

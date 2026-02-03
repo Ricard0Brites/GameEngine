@@ -9,6 +9,6 @@ void CollisionSystem::AsyncTick(float Delta)
 {
 	using namespace std;
 
-	cout << "COLLISION SYSTEM" << endl;
+	//cout << "COLLISION SYSTEM" << endl;
 }
 
