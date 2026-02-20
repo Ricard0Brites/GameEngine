@@ -4,8 +4,6 @@
 #include <mutex>
 #include "Core/Core.h"
 
-using namespace std;
-
 enum ELifeCycleState : uint8_t
 {
 	Initializing = 0,

@@ -53,11 +53,11 @@ void FVector::Fill(float Payload)
 std::string FVector::ToString() const
 {
 	std::lock_guard<std::recursive_mutex> lock(_Mutex);
-	string StringToReturn = "";
+	std::string StringToReturn = "";
 
-	StringToReturn += "X=" + to_string(X);
-	StringToReturn += "Y=" + to_string(Y);
-	StringToReturn += "Z=" + to_string(Z);
+	StringToReturn += "X=" + std::to_string(X);
+	StringToReturn += "Y=" + std::to_string(Y);
+	StringToReturn += "Z=" + std::to_string(Z);
 
 	return StringToReturn;
 }
