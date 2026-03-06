@@ -9,16 +9,11 @@ Engine::Engine(const WCHAR* InWindowTitle)
     : WindowBase(InWindowTitle), 
     EngineData(new FEngineData) // Deleted in Engine::~Engine()
 {
+
+    // Create Base Systems
     CreateThreadedTask<RenderSystem>();
     CreateThreadedTask<PhysicsSystem>();
     CreateThreadedTask<CollisionSystem>();
-}
-
-template<DerivedFromThreadedTask T>
-void Engine::CreateThreadedTask()
-{
-    // Emplace back directly constructs the unique_ptr in the vector
-    EngineData->Tasks.emplace_back(std::make_unique<T>());
 }
 
 // Destructor
@@ -62,12 +57,19 @@ void Engine::OnDestroy()
 
 #pragma region Threaded Tasks
 
+template<DerivedFromThreadedTask T>
+void Engine::CreateThreadedTask()
+{
+    // Emplace back directly constructs the unique_ptr in the vector
+    EngineData->Tasks.emplace_back(std::make_unique<T>());
+}
+
 void Engine::JoinThreads()
 {
-    for (const auto& tt : EngineData->Tasks)
+    for (const auto& Task : EngineData->Tasks)
     {
-        if (tt)
-            tt->Join();
+        if (Task)
+            Task->Join();
     }
 }
 

@@ -8,4 +8,7 @@ public:
 
 	void AsyncTick(float Delta) override;
 
+
+	void AsyncInit() override;
+
 };

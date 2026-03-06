@@ -2,22 +2,40 @@
 #include <string>
 #include <iostream>
 #include <mutex>
-#include "Core/Core.h"
 
-enum ELifeCycleState : uint8_t
+#define ENUM_CLASS_FLAGS(EnumType)\
+using UnderlyingTypeOf_##EnumType = std::underlying_type_t<EnumType>;\
+inline EnumType operator & (const EnumType& A, const EnumType& B) { return static_cast<EnumType>((static_cast<UnderlyingTypeOf_##EnumType>(A) & static_cast<UnderlyingTypeOf_##EnumType>(B))); }\
+inline EnumType operator | (const EnumType& A, const EnumType& B) { return static_cast<EnumType>((static_cast<UnderlyingTypeOf_##EnumType>(A) | static_cast<UnderlyingTypeOf_##EnumType>(B))); }\
+inline EnumType operator ^ (const EnumType& A, const EnumType& B) { return static_cast<EnumType>((static_cast<UnderlyingTypeOf_##EnumType>(A) ^ static_cast<UnderlyingTypeOf_##EnumType>(B))); }\
+inline EnumType operator ~ (const EnumType& A) { return static_cast<EnumType>(~static_cast<UnderlyingTypeOf_##EnumType>(A)); }\
+inline bool operator == (const EnumType& A, const UnderlyingTypeOf_##EnumType B) { return (static_cast<UnderlyingTypeOf_##EnumType>(A) == B); }\
+inline bool operator != (const EnumType& A, const UnderlyingTypeOf_##EnumType B) { return (static_cast<UnderlyingTypeOf_##EnumType>(A) != B); }
+
+
+// Redefined in core.h but to avoid a circular dependency this is here
+#ifdef EXPORTS_ENGINE
+#define ENGINE_API __declspec(dllexport)
+#else
+#define ENGINE_API __declspec(dllimport)
+#endif
+
+enum class ELifeCycleState : uint8_t
 {
-	Initializing = 0,
-	Ready = 1 << 0,			// 0x 0000 0001  = 1
-	PendingKill = 1 << 1,	// 0x 0000 0010 = 2
+	Uninitialized = 0,
+	Initializing = 1 << 0,	// 0x 0000 0001 = 1
+	Ready = 1 << 1,			// 0x 0000 0010 = 2
+	PendingKill = 1 << 2,	// 0x 0000 0100 = 4
 
-};
+}; ENUM_CLASS_FLAGS(ELifeCycleState);
 
-#pragma warning(push)
-#pragma warning(disable: 4251)
+#pragma warning( push )
+#pragma warning( disable : 4251 )
 struct ENGINE_API FVector
 {
 private:
 	mutable std::recursive_mutex _Mutex;
+
 	float X = 0,
 		  Y = 0,
 		  Z = 0;
@@ -219,8 +237,8 @@ public:
 	FVector GetScale();
 
 };
-#pragma warning(pop)
 struct FColor
 {
 	float R = 0.f, G = 0.f, B = 0.f, A = 1.f;
 };
+#pragma warning( pop )

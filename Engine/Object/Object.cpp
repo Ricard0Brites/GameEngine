@@ -34,9 +34,9 @@ Object* Object::FObjectData::GetOwner()
 	return Owner;
 }
 
-const bool& Object::FObjectData::GetIsPendingKill()
+bool Object::FObjectData::GetIsPendingKill()
 {
-	return IsPendingKill;
+	return (LifecycleState & ELifeCycleState::PendingKill) != 0;
 }
 
 #pragma endregion
@@ -55,7 +55,7 @@ void Object::FObjectData::SetOwner(Object* InOwner)
 
 void Object::FObjectData::SetPendingKill()
 {
-	IsPendingKill = true;
+	LifecycleState = ELifeCycleState::PendingKill;
 }
 
 #pragma endregion

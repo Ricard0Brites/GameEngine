@@ -4,7 +4,6 @@
 int main()
 {
 	Engine EngineInstance(L"Space Invaders"); // Instance on the stack
-	
 	// No need to check for validity or delete, destructor will be called automatically
 	EngineInstance.Launch(); // Game Loop
 

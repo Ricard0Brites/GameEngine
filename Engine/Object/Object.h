@@ -25,7 +25,7 @@ public:
 
 		const std::string& GetDisplayName();
 		Object* GetOwner();
-		const bool& GetIsPendingKill();
+		bool GetIsPendingKill();
 
 		// TODO - Add as needed
 
@@ -51,5 +51,5 @@ private:
 	Object* Owner = nullptr;
 
 	// Defines if the object is going to be destroyed or not (TODO - WIP GC)
-	bool IsPendingKill = false;
+	ELifeCycleState LifecycleState = ELifeCycleState::Uninitialized;
 };

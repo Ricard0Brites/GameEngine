@@ -10,3 +10,7 @@ void PhysicsSystem::AsyncTick(float Delta)
 {
 	//std::cout << Delta << std::endl;
 }
+
+void PhysicsSystem::AsyncInit()
+{
+}

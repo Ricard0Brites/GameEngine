@@ -12,3 +12,7 @@ void CollisionSystem::AsyncTick(float Delta)
 	//cout << "COLLISION SYSTEM" << endl;
 }
 
+void CollisionSystem::AsyncInit()
+{
+}
+

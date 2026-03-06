@@ -5,9 +5,10 @@
 
 class ENGINE_API ThreadedTask
 {
-    friend class Engine; // The only one to call ThreadedTask::Join()
+    friend class Engine; // The only one allowed to call ThreadedTask::Join()
 public:
     virtual void AsyncTick(float Delta) = 0;
+    virtual void AsyncInit() = 0;
     
     ThreadedTask() : TaskData(new FData)
     {
@@ -66,8 +67,10 @@ inline void ThreadedTask::Init()
 
 inline void ThreadedTask::Async_Init()
 {
-    std::chrono::steady_clock::time_point PreviousFrame = std::chrono::high_resolution_clock::now();
+    AsyncInit();
 
+    // Tick
+    std::chrono::steady_clock::time_point PreviousFrame = std::chrono::high_resolution_clock::now();
     while (IsRunning())
     {
         std::chrono::steady_clock::time_point CurrentFrame = std::chrono::high_resolution_clock::now();
