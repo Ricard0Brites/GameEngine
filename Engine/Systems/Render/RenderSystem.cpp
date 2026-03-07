@@ -139,7 +139,7 @@ bool RenderSystem::FDX12Data::CreateDX12Device()
 bool RenderSystem::FDX12Data::CreateCommandQueues()
 {
 	using Microsoft::WRL::ComPtr;
-	for (const std::pair<D3D12_COMMAND_LIST_TYPE, ComPtr<ID3D12CommandQueue>>& T : CommandQueues)
+	for (std::pair<D3D12_COMMAND_LIST_TYPE, ComPtr<ID3D12CommandQueue>> T : CommandQueues)
 	{
 		D3D12_COMMAND_QUEUE_DESC QueueDesc = {};
 
@@ -151,6 +151,8 @@ bool RenderSystem::FDX12Data::CreateCommandQueues()
 		//Create Command Queue
 		ComPtr<ID3D12CommandQueue> Cache;
 		HRESULT Res = Device->CreateCommandQueue(&QueueDesc, IID_PPV_ARGS(&Cache));
+
+		CommandQueues[T.first] = Cache;
 
 		if (Res < 0)
 		{
