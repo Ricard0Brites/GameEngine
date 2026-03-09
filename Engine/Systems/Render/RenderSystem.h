@@ -42,6 +42,7 @@ private:
 		// Returns true if all resources have been successfully created
 		bool Init();
 		bool GetIsValid() { return IsValid; }
+		void ResizeSwapChain(FVector2 NewResolution);
 
 		Microsoft::WRL::ComPtr<ID3D12Device14> GetDevice() { return Device; }
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue>& GetCommandQueue(D3D12_COMMAND_LIST_TYPE Type) { return CommandQueues[Type]; }
@@ -50,20 +51,35 @@ private:
 
 		WindowBase* AssociatedWindow = nullptr;
 
-	private:		
+	private:
+		void WaitForGPU();
+		void CreateRTVs();
+
 		// DX12
 		Microsoft::WRL::ComPtr<ID3D12Device14> Device = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12Fence1> Fence = nullptr;
-		std::unordered_map<D3D12_COMMAND_LIST_TYPE, Microsoft::WRL::ComPtr<ID3D12CommandQueue>> CommandQueues = 
-		{ 
+		UINT64 FenceValue = 0;
+		std::unordered_map<D3D12_COMMAND_LIST_TYPE, Microsoft::WRL::ComPtr<ID3D12CommandQueue>> CommandQueues =
+		{
 			{D3D12_COMMAND_LIST_TYPE_DIRECT, nullptr},
 			{D3D12_COMMAND_LIST_TYPE_COMPUTE, nullptr},
 			{D3D12_COMMAND_LIST_TYPE_COPY, nullptr}
 		};
-		
+
+
 		bool IsValid = false;
 
-		#pragma region Helpers
+#pragma region Swapchain
+		Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain = nullptr;
+		uint32_t FrameIndex = 0;
+		static const UINT BufferCount = 3; // 0 - Being Shown 1 & 2 switch turns being rendered
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> BackBuffers[BufferCount];
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RTVHeap = nullptr;
+		UINT RTVDescriptorSize = 0;
+#pragma endregion
+
+#pragma region Helpers
 
 		bool SupportsDX12();
 		bool CreateDX12Device();
@@ -71,10 +87,7 @@ private:
 		bool CreateFence();
 		bool CreateSwapchain(const HWND* WindowHandle);
 
-		#pragma endregion
-
-		Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain = nullptr;
-		uint32_t FrameIndex = 0;
+#pragma endregion
 	};
 	static FDX12Data DX12Data;
 

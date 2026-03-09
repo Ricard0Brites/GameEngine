@@ -47,9 +47,7 @@ RenderSystem::FDX12Data RenderSystem::DX12Data;
 
 void RenderSystem::OnWindowResizedEvent(FVector2 NewResolution)
 {
-
-
-
+	DX12Data.ResizeSwapChain(NewResolution);
 }
 
 bool RenderSystem::FDX12Data::Init()
@@ -83,7 +81,7 @@ bool RenderSystem::FDX12Data::Init()
 		return IsValid;
 	}
 
-	if (!(DX12Data.AssociatedWindow && CreateSwapchain(DX12Data.AssociatedWindow->GetWindow())))
+	if (!(AssociatedWindow && CreateSwapchain(AssociatedWindow->GetWindow())))
 	{
 		__debugbreak();
 		//Debug("Could not Create Swapchain RenderSystem::FDX12Data::Init()");
@@ -92,6 +90,52 @@ bool RenderSystem::FDX12Data::Init()
 	
 	IsValid = true;
 	return IsValid;
+}
+
+void RenderSystem::FDX12Data::ResizeSwapChain(FVector2 NewResolution)
+{
+	WaitForGPU();
+
+	for (int i = 0; i < BufferCount; ++i)
+	{
+		BackBuffers[i].Reset();
+	}
+
+	HRESULT Res = SwapChain->ResizeBuffers(BufferCount, NewResolution.GetX(), NewResolution.GetY(), DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	if (FAILED(Res))
+	{
+		__debugbreak();
+		//TODO - Log error
+	}
+
+	CreateRTVs();
+}
+
+void RenderSystem::FDX12Data::WaitForGPU()
+{
+	if (!Fence || !CommandQueues[D3D12_COMMAND_LIST_TYPE_DIRECT])
+		return;
+
+	CommandQueues[D3D12_COMMAND_LIST_TYPE_DIRECT]->Signal(Fence.Get(), ++FenceValue);
+
+	if (Fence->GetCompletedValue() < FenceValue)
+	{
+		HANDLE event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		Fence->SetEventOnCompletion(FenceValue, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
+	}
+}
+
+void RenderSystem::FDX12Data::CreateRTVs()
+{
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle(RTVHeap->GetCPUDescriptorHandleForHeapStart());
+	for (UINT i = 0; i < BufferCount; i++)
+	{
+		SwapChain->GetBuffer(i, IID_PPV_ARGS(&BackBuffers[i]));
+		Device->CreateRenderTargetView(BackBuffers[i].Get(), nullptr, rtvHandle);
+		rtvHandle.ptr += RTVDescriptorSize;
+	}
 }
 
 bool RenderSystem::FDX12Data::SupportsDX12()
@@ -107,11 +151,11 @@ bool RenderSystem::FDX12Data::CreateDX12Device()
 	// Factory
 	ComPtr<IDXGIFactory7> Factory = nullptr;
 	
-	#if defined(_DEBUG)
+#if defined(_DEBUG)
 	HRESULT Res = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&Factory));
-	#else
+#else
 	HRESULT Res = CreateDXGIFactory2(0, IID_PPV_ARGS(&Factory));
-	#endif
+#endif
 
 	if (Res < 0)
 	{
@@ -146,7 +190,7 @@ bool RenderSystem::FDX12Data::CreateDX12Device()
 bool RenderSystem::FDX12Data::CreateCommandQueues()
 {
 	using Microsoft::WRL::ComPtr;
-	for (std::pair<D3D12_COMMAND_LIST_TYPE, ComPtr<ID3D12CommandQueue>> T : CommandQueues)
+	for (auto& T : CommandQueues)
 	{
 		D3D12_COMMAND_QUEUE_DESC QueueDesc = {};
 
@@ -156,10 +200,7 @@ bool RenderSystem::FDX12Data::CreateCommandQueues()
 		QueueDesc.Type = T.first;
 
 		//Create Command Queue
-		ComPtr<ID3D12CommandQueue> Cache;
-		HRESULT Res = Device->CreateCommandQueue(&QueueDesc, IID_PPV_ARGS(&Cache));
-
-		CommandQueues[T.first] = Cache;
+		HRESULT Res = Device->CreateCommandQueue(&QueueDesc, IID_PPV_ARGS(&T.second));
 
 		if (Res < 0)
 		{
@@ -182,6 +223,7 @@ bool RenderSystem::FDX12Data::CreateFence()
 	}
 
 	Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence));
+	FenceValue = 0;
 
 	return true;
 }
@@ -190,6 +232,9 @@ bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 {
 	if (!AssociatedWindow)
 		return false;
+
+	WaitForGPU();
+	SwapChain.Reset();
 
 	using Microsoft::WRL::ComPtr;
 	ComPtr<IDXGIFactory7> Factory = nullptr;
@@ -201,7 +246,7 @@ bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 #endif
 
 	DXGI_SWAP_CHAIN_DESC1 SwapchainDesc = {};
-	SwapchainDesc.BufferCount = 3;
+	SwapchainDesc.BufferCount = BufferCount;
 	SwapchainDesc.Width = (UINT)AssociatedWindow->GetResolution().GetX();
 	SwapchainDesc.Height = (UINT)AssociatedWindow->GetResolution().GetY();
 	SwapchainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 8 bit depth
@@ -222,14 +267,23 @@ bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 	if (!SwapChainCache)
 		return false;
 
-	SwapChain = (IDXGISwapChain4*)SwapChainCache.Get();
-
-	if (!SwapChain)
+	if(FAILED(SwapChainCache.As(&SwapChain)))
 		return false;
 
 	Factory->MakeWindowAssociation(*WindowHandle, 0);
 
 	FrameIndex = SwapChain->GetCurrentBackBufferIndex();
+
+	// Create RTV Descriptor Heap
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+	rtvHeapDesc.NumDescriptors = BufferCount;
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	Device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&RTVHeap));
+
+	RTVDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	CreateRTVs();
 
 	return true;
 }
