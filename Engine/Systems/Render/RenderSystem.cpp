@@ -94,7 +94,7 @@ bool RenderSystem::FDX12Data::Init()
 
 void RenderSystem::FDX12Data::ResizeSwapChain(FVector2 NewResolution)
 {
-	WaitForGPU();
+	WaitForGPU(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
 	for (int i = 0; i < BufferCount; ++i)
 	{
@@ -111,19 +111,19 @@ void RenderSystem::FDX12Data::ResizeSwapChain(FVector2 NewResolution)
 	CreateRTVs();
 }
 
-void RenderSystem::FDX12Data::WaitForGPU()
+void RenderSystem::FDX12Data::WaitForGPU(D3D12_COMMAND_LIST_TYPE CommandListType)
 {
-	if (!Fence || !CommandQueues[D3D12_COMMAND_LIST_TYPE_DIRECT])
+	if (!Fence || !CommandQueues[CommandListType])
 		return;
 
-	CommandQueues[D3D12_COMMAND_LIST_TYPE_DIRECT]->Signal(Fence.Get(), ++FenceValue);
+	CommandQueues[CommandListType]->Signal(Fence.Get(), ++FenceValue);
 
 	if (Fence->GetCompletedValue() < FenceValue)
 	{
-		HANDLE event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-		Fence->SetEventOnCompletion(FenceValue, event);
-		WaitForSingleObject(event, INFINITE);
-		CloseHandle(event);
+		HANDLE OnGPUFinished = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		Fence->SetEventOnCompletion(FenceValue, OnGPUFinished);
+		WaitForSingleObject(OnGPUFinished, INFINITE);
+		CloseHandle(OnGPUFinished);
 	}
 }
 
@@ -233,7 +233,7 @@ bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 	if (!AssociatedWindow)
 		return false;
 
-	WaitForGPU();
+	WaitForGPU(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	SwapChain.Reset();
 
 	using Microsoft::WRL::ComPtr;

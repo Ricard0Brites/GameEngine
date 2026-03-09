@@ -52,7 +52,7 @@ private:
 		WindowBase* AssociatedWindow = nullptr;
 
 	private:
-		void WaitForGPU();
+		void WaitForGPU(D3D12_COMMAND_LIST_TYPE CommandListType);
 		void CreateRTVs();
 
 		// DX12
