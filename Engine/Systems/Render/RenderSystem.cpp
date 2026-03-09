@@ -1,10 +1,12 @@
 #include "RenderSystem.h"
 #include <iostream>
 #include <utility>
+#include "Windows/WindowBase.h"
 
 
-RenderSystem::RenderSystem() : ThreadedTask()
+RenderSystem::RenderSystem(WindowBase* InAssociatedWindow)
 {
+	DX12Data.AssociatedWindow = InAssociatedWindow;
 }
 
 void RenderSystem::AsyncInit()
@@ -22,14 +24,6 @@ void RenderSystem::AsyncInit()
 		__debugbreak();
 		return;
 	}
-	if (!DXGIData.Init())
-	{
-		//TODO - Error Message here (Add Log System)
-		__debugbreak();
-		return;
-	}
-
-	
 }
 
 void RenderSystem::AsyncTick(float Delta)
@@ -50,6 +44,10 @@ bool RenderSystem::IsDebugEnabled()
 }
 
 RenderSystem::FDX12Data RenderSystem::DX12Data;
+
+void RenderSystem::OnWindowResizedEvent(FVector2 NewResolution)
+{
+}
 
 bool RenderSystem::FDX12Data::Init()
 {
@@ -80,9 +78,15 @@ bool RenderSystem::FDX12Data::Init()
 		__debugbreak();
 		//Debug("Could not Create Fence RenderSystem::FDX12Data::Init()");
 		return IsValid;
-
 	}
-		
+
+	if (!(DX12Data.AssociatedWindow && CreateSwapchain(DX12Data.AssociatedWindow->GetWindow())))
+	{
+		__debugbreak();
+		//Debug("Could not Create Swapchain RenderSystem::FDX12Data::Init()");
+		return IsValid;
+	}
+	
 	IsValid = true;
 	return IsValid;
 }
@@ -167,20 +171,64 @@ bool RenderSystem::FDX12Data::CreateCommandQueues()
 
 bool RenderSystem::FDX12Data::CreateFence()
 {
+	if (!Device)
+	{
+		__debugbreak();
+		//Debug("Device is Invalid Cant generate fence.");
+		return false;
+	}
+
+	Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence));
+
 	return true;
 }
 
-#pragma endregion
-
-#pragma region DXGI
-
-RenderSystem::FDXGIData RenderSystem::DXGIData;
-
-bool RenderSystem::FDXGIData::Init()
+bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 {
+	if (!AssociatedWindow)
+		return false;
 
-	IsValid = true;
-	return IsValid;
+	using Microsoft::WRL::ComPtr;
+	ComPtr<IDXGIFactory7> Factory = nullptr;
+
+#if defined(_DEBUG)
+	HRESULT Res = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&Factory));
+#else
+	HRESULT Res = CreateDXGIFactory2(0, IID_PPV_ARGS(&Factory));
+#endif
+
+	DXGI_SWAP_CHAIN_DESC1 SwapchainDesc = {};
+	SwapchainDesc.BufferCount = 3;
+	SwapchainDesc.Width = (UINT)AssociatedWindow->GetResolution().GetX();
+	SwapchainDesc.Height = (UINT)AssociatedWindow->GetResolution().GetY();
+	SwapchainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 8 bit depth
+	SwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	SwapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	SwapchainDesc.SampleDesc.Count = 1;
+
+	Microsoft::WRL::ComPtr<IDXGISwapChain1> SwapChainCache = nullptr;
+
+	Factory->CreateSwapChainForHwnd(
+		CommandQueues[D3D12_COMMAND_LIST_TYPE_DIRECT].Get(),
+		*WindowHandle,
+		&SwapchainDesc,
+		nullptr,
+		nullptr,
+		&SwapChainCache
+		);
+	if (!SwapChainCache)
+		return false;
+
+	SwapChain = (IDXGISwapChain4*)SwapChainCache.Get();
+
+	if (!SwapChain)
+		return false;
+
+	Factory->MakeWindowAssociation(*WindowHandle, 0);
+
+	FrameIndex = SwapChain->GetCurrentBackBufferIndex();
+
+	return true;
 }
 
 #pragma endregion

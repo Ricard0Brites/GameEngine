@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include <memory>
 #include "Systems/Collision/CollisionSystem.h"
 #include "Systems/Physics/PhysicsSystem.h"
 #include "Systems/Render/RenderSystem.h"
@@ -9,9 +10,10 @@ Engine::Engine(const WCHAR* InWindowTitle)
     : WindowBase(InWindowTitle), 
     EngineData(new FEngineData) // Deleted in Engine::~Engine()
 {
-
     // Create Base Systems
-    CreateThreadedTask<RenderSystem>();
+    auto RenderSystemSharedPtr = CreateThreadedTask<RenderSystem>(this);
+    OnWindowResizeDelegate.Bind(RenderSystemSharedPtr, &RenderSystem::OnWindowResizedEvent);
+
     CreateThreadedTask<PhysicsSystem>();
     CreateThreadedTask<CollisionSystem>();
 }
@@ -57,11 +59,14 @@ void Engine::OnDestroy()
 
 #pragma region Threaded Tasks
 
-template<DerivedFromThreadedTask T>
-void Engine::CreateThreadedTask()
+template<DerivedFromThreadedTask T, typename ...Args>
+std::shared_ptr<T> Engine::CreateThreadedTask(Args ...args)
 {
     // Emplace back directly constructs the unique_ptr in the vector
-    EngineData->Tasks.emplace_back(std::make_unique<T>());
+    auto NewTask = std::make_shared<T>(args...);
+    EngineData->Tasks.emplace_back(NewTask);
+
+    return NewTask;
 }
 
 void Engine::JoinThreads()
@@ -75,7 +80,7 @@ void Engine::JoinThreads()
 
 void Engine::StopThreads()
 {
-    for (const std::unique_ptr<ThreadedTask> &Task : EngineData->Tasks)
+    for (const std::shared_ptr<ThreadedTask> &Task : EngineData->Tasks)
     {
         if (Task)
             Task->StopThread();

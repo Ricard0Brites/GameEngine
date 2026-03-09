@@ -72,10 +72,10 @@ public:
 
 
 	// Utility Methods
-	FVector UpVector(bool ApplyToSelf);
-	FVector ForwardVector(bool ApplyToSelf);
-	FVector RighVector(bool ApplyToSelf);
-	FVector Zero(bool ApplyToSelf);
+	FVector UpVector();
+	FVector ForwardVector();
+	FVector RighVector();
+	FVector Zero();
 	void Fill(float Payload);
 	std::string ToString() const;
 
@@ -182,6 +182,148 @@ public:
 	}
 };
 
+struct ENGINE_API FVector2
+{
+private:
+	mutable std::recursive_mutex _Mutex;
+
+	float X = 0, Y = 0;
+public:
+	// Constructors
+	FVector2(float x = 0, float y = 0, float z = 0) : X(x), Y(y) {}
+	~FVector2() = default;
+
+	FVector2(const FVector2& other)
+	{
+		std::lock_guard<std::recursive_mutex> lock(other._Mutex);
+		X = other.X;
+		Y = other.Y;
+	}
+
+	// Getters
+	float GetX() const { std::lock_guard<std::recursive_mutex> lock(_Mutex); return X; }
+	float GetY() const { std::lock_guard<std::recursive_mutex> lock(_Mutex); return Y; }
+	void Get(float& outX, float& outY) const
+	{
+		std::lock_guard<std::recursive_mutex> lock(_Mutex);
+		outX = X;
+		outY = Y;
+	}
+
+	// Setters
+	void SetX(float val) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X = val; }
+	void SetY(float val) { std::lock_guard<std::recursive_mutex> lock(_Mutex); Y = val; }
+	void Set(float x, float y) { std::lock_guard<std::recursive_mutex> lock(_Mutex); X = x; Y = y; }
+
+
+	// Utility Methods
+	FVector2 Zero();
+	void Fill(float Payload);
+	std::string ToString() const;
+
+	// Operators
+	FVector2& operator=(const FVector2& in)
+	{
+		if (this == &in) return *this;
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		X = in.X; Y = in.Y;
+		return *this;
+	}
+
+	FVector2& operator=(float in)
+	{
+		std::lock_guard<std::recursive_mutex> lock(_Mutex);
+		X = in; Y = in;
+		return *this;
+	}
+
+	// Compound Assignment
+	FVector2& operator+=(const FVector2& in)
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		X += in.X; Y += in.Y;
+		return *this;
+	}
+
+	FVector2& operator-=(const FVector2& in)
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		X -= in.X; Y -= in.Y;
+		return *this;
+	}
+
+	FVector2& operator*=(const FVector2& in)
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		X *= in.X; Y *= in.Y;
+		return *this;
+	}
+
+	FVector2& operator/=(const FVector2& in)
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		X /= in.X; Y /= in.Y;
+		return *this;
+	}
+
+	// Binary Operators
+	FVector2 operator+(const FVector2& in) const
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		return FVector2(X + in.X, Y + in.Y);
+	}
+
+	FVector2 operator-(const FVector2& in) const
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		return FVector2(X - in.X, Y - in.Y);
+	}
+
+	FVector2 operator*(const FVector2& in) const
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		return FVector2(X * in.X, Y * in.Y);
+	}
+
+	FVector2 operator/(const FVector2& in) const
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		return FVector2(X / in.X, Y / in.Y);
+	}
+
+	// Comparison
+	bool operator==(const FVector2& in) const
+	{
+		std::lock(_Mutex, in._Mutex);
+		std::lock_guard<std::recursive_mutex> this_lock(_Mutex, std::adopt_lock);
+		std::lock_guard<std::recursive_mutex> in_lock(in._Mutex, std::adopt_lock);
+		return (X == in.X && Y == in.Y);
+	}
+
+	bool operator!=(const FVector2& in) const
+	{
+		return !(*this == in);
+	}
+};
+
 struct ENGINE_API FTransform
 {
 private:
@@ -237,7 +379,8 @@ public:
 	FVector GetScale();
 
 };
-struct FColor
+
+struct ENGINE_API FColor
 {
 	float R = 0.f, G = 0.f, B = 0.f, A = 1.f;
 };

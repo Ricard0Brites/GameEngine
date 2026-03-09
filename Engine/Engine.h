@@ -8,8 +8,9 @@ class ThreadedTask;
 template <typename T>
 concept DerivedFromThreadedTask = std::is_base_of_v<ThreadedTask, T>;
 
-class ENGINE_API Engine : private WindowBase
+class ENGINE_API Engine : public WindowBase
 {
+
 public:
     Engine(const WCHAR* InWindowTitle);
     ~Engine(); // Destructor must be defined in the .cpp file with PImpl
@@ -25,8 +26,8 @@ public:
     void OnDestroy() override;
     
     //Threaded Tasks
-    template<DerivedFromThreadedTask T>
-    void CreateThreadedTask();
+    template<DerivedFromThreadedTask T, typename ...Args>
+    std::shared_ptr<T> CreateThreadedTask(Args ...args);
 private:
     // Remove Heap operations
     void* operator new(size_t) = delete;
@@ -48,5 +49,5 @@ struct Engine::FEngineData
     bool IsRunning = false;
     
     // Keeps a reference & ownership of all threaded tasks
-    std::vector<std::unique_ptr<ThreadedTask>> Tasks;
+    std::vector<std::shared_ptr<ThreadedTask>> Tasks;
 };

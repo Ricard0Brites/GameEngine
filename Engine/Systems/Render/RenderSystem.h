@@ -19,7 +19,8 @@ class ENGINE_API RenderSystem final : public ThreadedTask
 {
 
 public:
-    RenderSystem();
+    RenderSystem(class WindowBase* InAssociatedWindow);
+    void OnWindowResizedEvent(FVector2 NewResolution);
 
 
 private:
@@ -43,8 +44,11 @@ private:
 		bool GetIsValid() { return IsValid; }
 
 		Microsoft::WRL::ComPtr<ID3D12Device14> GetDeviceSafe() { return Device; }
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue> GetCommandQueueSafe(D3D12_COMMAND_LIST_TYPE Type) { return CommandQueues[Type]; }
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue>& GetCommandQueueSafe(D3D12_COMMAND_LIST_TYPE Type) { return CommandQueues[Type]; }
 		Microsoft::WRL::ComPtr<ID3D12Fence1> GetFenceSafe() { return Fence; }
+		const Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChainSafe() { return SwapChain; }
+
+		WindowBase* AssociatedWindow = nullptr;
 
 	private:		
 		// DX12
@@ -65,28 +69,13 @@ private:
 		bool CreateDX12Device();
 		bool CreateCommandQueues();
 		bool CreateFence();
+		bool CreateSwapchain(const HWND* WindowHandle);
 
 		#pragma endregion
 
+		Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain = nullptr;
+		uint32_t FrameIndex = 0;
 	};
 	static FDX12Data DX12Data;
-	
-	struct FDXGIData
-	{
-	public:
-		FDXGIData() = default;
 
-		bool Init();
-
-		const IDXGISwapChain4* GetSwapChain() { return SwapChain.Get(); }
-		const Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChainSafe() { return SwapChain; }
-
-		bool GetIsValid() { return IsValid; }
-
-	private:
-		Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain = nullptr;
-
-		bool IsValid = false;
-	};
-	static FDXGIData DXGIData;
 };

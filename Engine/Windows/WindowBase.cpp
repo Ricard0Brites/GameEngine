@@ -9,6 +9,7 @@ struct WindowBase::WindowBaseImpl
     const WCHAR* ClassName = nullptr;
     std::wstring ClassNameCache; // To hold the generated class name string
     HWND WindowHandle = nullptr;
+    FVector2 Resolution = 0;
 };
 
 // --- Free Functions for Window Logic ---
@@ -33,11 +34,17 @@ bool RegisterWindowClass(WindowBase::WindowBaseImpl* Pimpl)
         std::cout << "Window Class Registration failed" << std::endl;
         return false;
     }
+   
     return true;
 }
 
 bool CreateWindowInstance(WindowBase::WindowBaseImpl* Pimpl)
 {
+    if (!Pimpl)
+        return false;
+
+    Pimpl->Resolution.Set(1280, 720); // TODO - Replace this to be dynamic (INI file maybe)
+
     Pimpl->WindowHandle = CreateWindowExW(
         0,
         Pimpl->ClassName,
@@ -45,8 +52,8 @@ bool CreateWindowInstance(WindowBase::WindowBaseImpl* Pimpl)
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        1280,
-        720,
+        (int)Pimpl->Resolution.GetX(),
+        (int)Pimpl->Resolution.GetY(),
         nullptr,
         nullptr,
         GetModuleHandle(nullptr),
@@ -58,9 +65,6 @@ bool CreateWindowInstance(WindowBase::WindowBaseImpl* Pimpl)
         std::cout << "Window Instance is invalid. Aborting..." << std::endl;
         return false;
     }
-
-    ShowWindow(Pimpl->WindowHandle, SW_SHOW);
-    UpdateWindow(Pimpl->WindowHandle);
 
     return true;
 }
@@ -77,10 +81,58 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+
+    case WM_SIZE:
+    {
+        // Mark dirty for any size-affecting change
+        if (wParam != SIZE_MINIMIZED)
+        {
+            WindowBase* WindowRef = WindowsList[hWnd];
+            if (!WindowRef)
+                break;
+            WindowRef->Internal_WindowSizeDirty = true;
+        }
+        break;
+    }
+    case WM_EXITSIZEMOVE:
+    {
+        WindowBase* WindowRef = WindowsList[hWnd];
+
+        if (!WindowRef)
+            break;
+
+        // Fired once when user finishes free resize or move
+        if (WindowRef->Internal_WindowSizeDirty)
+        {
+            WindowRef->Internal_BroadcastWindowSize(hWnd);
+            WindowRef->Internal_WindowSizeDirty = false;
+        }
+        break;
+    }
+
+    case WM_SYSCOMMAND:
+    {
+        switch (wParam & 0xFFF0)
+        {
+        case SC_MAXIMIZE:
+        case SC_RESTORE:
+        {
+            WindowBase* WindowRef = WindowsList[hWnd];
+
+            if (!WindowRef)
+                break;
+
+            LRESULT Res = DefWindowProcW(hWnd, msg, wParam, lParam);
+            WindowRef->Internal_BroadcastWindowSize(hWnd);
+            WindowRef->Internal_WindowSizeDirty = false;
+            return Res;
+        }
+        }
+        break;
+    }
     }
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
-
 
 // --- WindowBase Method Implementations ---
 
@@ -93,20 +145,46 @@ WindowBase::WindowBase(const WCHAR* InWindowTitle)
 
     RegisterWindowClass(Pimpl);
     CreateWindowInstance(Pimpl);
+    WindowsList.insert({ Pimpl->WindowHandle, this });
+    UpdateWindow(Pimpl->WindowHandle);
+    ShowWindow(Pimpl->WindowHandle, SW_SHOW);
 }
 
 WindowBase::~WindowBase()
 {
-    if (Pimpl && Pimpl->WindowHandle)
-    {
-        DestroyWindow(Pimpl->WindowHandle);
-    }
-
     if (Pimpl)
     {
+        if(Pimpl->WindowHandle)
+            DestroyWindow(Pimpl->WindowHandle);
+     
         delete(Pimpl);
         Pimpl = nullptr;
     }
+}
+
+HWND* WindowBase::GetWindow()
+{
+    return &Pimpl->WindowHandle;
+}
+
+const FVector2& WindowBase::GetResolution()
+{
+    return Pimpl->Resolution;
+}
+
+void WindowBase::Internal_BroadcastWindowSize(const HWND& hWnd)
+{
+    // Send Window Resize Event
+    RECT r;
+    if (GetWindowRect(hWnd, &r))
+    {
+        FVector2 NewResolution = FVector2((float)(r.right - r.left), (float)(r.bottom - r.top));
+        OnWindowResizeDelegate.Execute(NewResolution);
+        Pimpl->Resolution = NewResolution;
+    }
+
+    // Reset Dirtiness
+    Internal_WindowSizeDirty = false;
 }
 
 void WindowBase::PumpMessages()

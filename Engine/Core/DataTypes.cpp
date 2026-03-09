@@ -1,47 +1,42 @@
 #include "DataTypes.h"
 
-FVector FVector::UpVector(bool ApplyToSelf)
+FVector FVector::UpVector()
 {
-	const FVector up(0, 0, 1);
-	if (ApplyToSelf)
-	{
-		std::lock_guard<std::recursive_mutex> lock(_Mutex);
-		*this = up;
-	}
-	return up;
+	return FVector(0, 0, 1);
 }
 
-FVector FVector::ForwardVector(bool ApplyToSelf)
+FVector FVector::ForwardVector()
 {
-	const FVector forward(0, 1, 0);
-	if (ApplyToSelf)
-	{
-		std::lock_guard<std::recursive_mutex> lock(_Mutex);
-		*this = forward;
-	}
-	return forward;
+	return FVector(0, 1, 0);
+
 }
 
-FVector FVector::RighVector(bool ApplyToSelf)
+FVector FVector::RighVector()
 {
-	const FVector right(1, 0, 0);
-	if (ApplyToSelf)
-	{
-		std::lock_guard<std::recursive_mutex> lock(_Mutex);
-		*this = right;
-	}
-	return right;
+	return FVector(1, 0, 0);
 }
 
-FVector FVector::Zero(bool ApplyToSelf)
+FVector FVector::Zero()
 {
-	const FVector zero(0, 0, 0);
-	if (ApplyToSelf)
-	{
-		std::lock_guard<std::recursive_mutex> lock(_Mutex);
-		*this = zero;
-	}
-	return zero;
+	return FVector(0, 0, 0);
+}
+
+FVector FTransform::GetLocation()
+{	
+	std::lock_guard<std::mutex> lock(_locationMutex);
+	return _Location;
+}
+
+FVector FTransform::GetRotation()
+{
+	std::lock_guard<std::mutex> lock(_rotationMutex);
+	return _Rotation;
+}
+
+FVector FTransform::GetScale()
+{
+	std::lock_guard<std::mutex> lock(_scaleMutex);
+	return _Scale;
 }
 
 void FVector::Fill(float Payload)
@@ -75,20 +70,26 @@ FTransform::~FTransform()
 {
 }
 
-FVector FTransform::GetLocation()
-{	
-	std::lock_guard<std::mutex> lock(_locationMutex);
-	return _Location;
+// Vector 2D
+
+FVector2 FVector2::Zero()
+{
+	return FVector2(0, 0);
 }
 
-FVector FTransform::GetRotation()
+void FVector2::Fill(float Payload)
 {
-	std::lock_guard<std::mutex> lock(_rotationMutex);
-	return _Rotation;
+	X = Payload;
+	Y = Payload;
 }
 
-FVector FTransform::GetScale()
+std::string FVector2::ToString() const
 {
-	std::lock_guard<std::mutex> lock(_scaleMutex);
-	return _Scale;
+	std::lock_guard<std::recursive_mutex> lock(_Mutex);
+	std::string StringToReturn = "";
+
+	StringToReturn += "X=" + std::to_string(X);
+	StringToReturn += "Y=" + std::to_string(Y);
+
+	return StringToReturn;
 }

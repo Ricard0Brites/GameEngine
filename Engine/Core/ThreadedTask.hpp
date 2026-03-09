@@ -30,6 +30,8 @@ public:
         }
     }
     
+    Delegate<std::string> OnEventDispatch;
+
 private:
 
     // Starts the async execution
