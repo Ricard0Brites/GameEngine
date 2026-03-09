@@ -47,6 +47,9 @@ RenderSystem::FDX12Data RenderSystem::DX12Data;
 
 void RenderSystem::OnWindowResizedEvent(FVector2 NewResolution)
 {
+
+
+
 }
 
 bool RenderSystem::FDX12Data::Init()

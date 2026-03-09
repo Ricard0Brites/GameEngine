@@ -43,10 +43,10 @@ private:
 		bool Init();
 		bool GetIsValid() { return IsValid; }
 
-		Microsoft::WRL::ComPtr<ID3D12Device14> GetDeviceSafe() { return Device; }
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue>& GetCommandQueueSafe(D3D12_COMMAND_LIST_TYPE Type) { return CommandQueues[Type]; }
-		Microsoft::WRL::ComPtr<ID3D12Fence1> GetFenceSafe() { return Fence; }
-		const Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChainSafe() { return SwapChain; }
+		Microsoft::WRL::ComPtr<ID3D12Device14> GetDevice() { return Device; }
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue>& GetCommandQueue(D3D12_COMMAND_LIST_TYPE Type) { return CommandQueues[Type]; }
+		Microsoft::WRL::ComPtr<ID3D12Fence1> GetFence() { return Fence; }
+		const Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain() { return SwapChain; }
 
 		WindowBase* AssociatedWindow = nullptr;
 
