@@ -1,14 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36811.4 d17.14
+VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{527C7615-6117-4AA7-ADBF-AC9CC0BE838F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F29C54A8-0B3F-45D9-ADBA-E807F2B34118} = {F29C54A8-0B3F-45D9-ADBA-E807F2B34118}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpaceInvaders", "SpaceInvaders\SpaceInvaders.vcxproj", "{83C06BAD-AEE1-404A-A692-F46186355DDC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{527C7615-6117-4AA7-ADBF-AC9CC0BE838F} = {527C7615-6117-4AA7-ADBF-AC9CC0BE838F}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Logger", "Logger\Logger.vcxproj", "{F29C54A8-0B3F-45D9-ADBA-E807F2B34118}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +29,10 @@ Global
 		{83C06BAD-AEE1-404A-A692-F46186355DDC}.Debug|x64.Build.0 = Debug|x64
 		{83C06BAD-AEE1-404A-A692-F46186355DDC}.Release|x64.ActiveCfg = Release|x64
 		{83C06BAD-AEE1-404A-A692-F46186355DDC}.Release|x64.Build.0 = Release|x64
+		{F29C54A8-0B3F-45D9-ADBA-E807F2B34118}.Debug|x64.ActiveCfg = Debug|x64
+		{F29C54A8-0B3F-45D9-ADBA-E807F2B34118}.Debug|x64.Build.0 = Debug|x64
+		{F29C54A8-0B3F-45D9-ADBA-E807F2B34118}.Release|x64.ActiveCfg = Release|x64
+		{F29C54A8-0B3F-45D9-ADBA-E807F2B34118}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
