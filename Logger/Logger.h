@@ -27,8 +27,6 @@ public:
 		Custom3		= 1 << 7
 	};
 
-	static std::vector<std::string> LogTags;
-
 	static std::map<ELogCategories, std::string> ColorMap;
 
 	inline static void Log(ELogCategories LogLevel, std::string Message, std::string SystemTag);
