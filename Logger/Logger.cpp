@@ -7,8 +7,6 @@
 #include <iomanip>
 #include <sstream>
 
-std::vector<std::string> Logger::LogTags = {"Default"};
-
 std::map<Logger::ELogCategories, std::string> Logger::ColorMap =
 {
 	{ELogCategories::Verbose, "\x1b[97m"},	// White Text
