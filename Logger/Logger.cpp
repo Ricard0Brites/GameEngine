@@ -19,7 +19,7 @@ std::map<Logger::ELogCategories, std::string> Logger::ColorMap =
 	{ELogCategories::Custom3, "\x1b[95m"}	// Magenta Text
 };
 
-void Logger::Log(ELogCategories LogLevel, std::string Message, std::string SystemTag)
+LOGGER_API void Logger::Log(ELogCategories LogLevel, std::string Message, std::string SystemTag)
 {
 	std::cout << ColorMap[LogLevel]  << GetPreciseTimeStamp().c_str() << Message << "\x1b[0m" << std::endl;
 	WriteToLog(SystemTag, Message);
@@ -33,7 +33,7 @@ void Logger::Clear()
 void Logger::WriteToLog(std::string SystemTag, const std::string& Content)
 {
 
-	#ifdef NDEBUG | WRITETOLOG
+	#if (NDEBUG || WRITETOLOG)
 	
 	using namespace std;
 	filesystem::path p = filesystem::current_path();
