@@ -9,12 +9,12 @@
 #define LOGGER_API __declspec(dllimport)
 #endif
 
-class LOGGER_API Logger
+class Logger
 {
 public:
 	Logger() = default;
 
-	enum class ELogCategories : uint8_t
+	enum class LOGGER_API ELogCategories : uint8_t
 	{
 		None = 0,
 		Verbose		= 1 << 0,
@@ -27,13 +27,11 @@ public:
 		Custom3		= 1 << 7
 	};
 
-	static std::map<ELogCategories, std::string> ColorMap;
-
-	inline static void Log(ELogCategories LogLevel, std::string Message, std::string SystemTag);
-	inline static void Clear();
+	LOGGER_API inline static void Log(ELogCategories LogLevel, std::string Message, std::string SystemTag);
+	LOGGER_API inline static void Clear();
 
 private:
 	static void WriteToLog(std::string SystemTag, const std::string& Content);
-
+	static std::map<ELogCategories, std::string> ColorMap;
 	static std::string GetPreciseTimeStamp();
 };
