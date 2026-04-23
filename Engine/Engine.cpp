@@ -1,61 +1,83 @@
 #include "Engine.h"
 #include <memory>
+
+
+#include "Windows/Spawnable/SpawnableWindow.h"
 #include "Systems/Collision/CollisionSystem.h"
 #include "Systems/Physics/PhysicsSystem.h"
 #include "Systems/Render/RenderSystem.h"
-#include "Windows/WindowBase.h"
 
-// Constructor
-Engine::Engine(const WCHAR* InWindowTitle)
-    : WindowBase(InWindowTitle), 
-    EngineData(new FEngineData) // Deleted in Engine::~Engine()
+#pragma region Construction & Destruction
+
+Engine::Engine() : EngineData(std::make_unique<FEngineData>())
 {
-    // Create Base Systems
-    auto RenderSystemSharedPtr = CreateThreadedTask<RenderSystem>(this);
-    OnWindowResizeDelegate.Bind(RenderSystemSharedPtr, &RenderSystem::OnWindowResizedEvent);
-
-    CreateThreadedTask<PhysicsSystem>();
-    CreateThreadedTask<CollisionSystem>();
 }
 
-// Destructor
 Engine::~Engine()
 {
-    if (EngineData)
-    {
-        delete(EngineData);
-        EngineData = nullptr;
-    }
+    if (EngineData.get())
+        EngineData.reset();
+}
+
+#pragma endregion
+
+void Engine::Init()
+{
+    if (!EngineInstance.get())
+        __debugbreak();
+
+    #pragma region Spawn Window
+
+    EngineData->Window = std::make_shared<SpawnableWindow>();
+
+    if (SpawnableWindow* w = EngineData->Window.get())
+        w->OnWindowDestroyedDelegate.Bind(EngineInstance, &Engine::Quit);
+
+    #pragma endregion
+
+    #pragma region Spawn Systems
+
+    // Create Base Systems
+    CreateThreadedTask<RenderSystem>(EngineData->Window);
+    CreateThreadedTask<PhysicsSystem>();
+    CreateThreadedTask<CollisionSystem>();
+
+    #pragma endregion
 }
 
 void Engine::Launch()
 {
+    Init();
+
     EngineData->IsRunning = true;
     while (EngineData->IsRunning)
     {
-        PumpMessages();
+        if (EngineData->Window.get())
+            EngineData->Window->PumpMessages();
     }
-    
-    JoinThreads();
 
-    //The program ends here
+    Quit();
 }
 
 void Engine::Quit()
 {
     EngineData->IsRunning = false;
-    StopThreads(); // Only stops execution (Destructor handles the rest)
+    StopThreads();
 }
 
-void Engine::OnMessageReceived(UINT msg)
+#pragma region Singleton
+
+std::shared_ptr<Engine> Engine::GetEngineInstance()
 {
-	// TODO - Input Event Handling
+    if (EngineInstance.get())
+        return EngineInstance;
+    EngineInstance = std::make_shared < Engine >();
+    return EngineInstance;
 }
 
-void Engine::OnDestroy()
-{
-    Quit();
-}
+std::shared_ptr<Engine> Engine::EngineInstance = nullptr;
+
+#pragma endregion
 
 #pragma region Threaded Tasks
 
@@ -63,19 +85,11 @@ template<DerivedFromThreadedTask T, typename ...Args>
 std::shared_ptr<T> Engine::CreateThreadedTask(Args ...args)
 {
     // Emplace back directly constructs the unique_ptr in the vector
-    auto NewTask = std::make_shared<T>(args...);
-    EngineData->Tasks.emplace_back(NewTask);
+    std::shared_ptr<T> NewTask = std::make_shared<T>(args...);
+    if(EngineData.get())
+        EngineData->Tasks.push_back(NewTask);
 
     return NewTask;
-}
-
-void Engine::JoinThreads()
-{
-    for (const auto& Task : EngineData->Tasks)
-    {
-        if (Task)
-            Task->Join();
-    }
 }
 
 void Engine::StopThreads()
@@ -85,6 +99,13 @@ void Engine::StopThreads()
         if (Task)
             Task->StopThread();
     }
+    EngineData->Tasks.clear();
 }
+
+#pragma endregion
+
+#pragma region Objects
+
+std::vector<std::shared_ptr<Object>> Engine::Objects = {}; // Initialize empty
 
 #pragma endregion

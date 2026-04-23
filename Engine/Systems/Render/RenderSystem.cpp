@@ -1,10 +1,13 @@
 #include "RenderSystem.h"
 #include <iostream>
 #include <utility>
-#include "Windows/WindowBase.h"
+#include "Logger.h"
+#include <memory>
+#include "Windows/Spawnable/SpawnableWindow.h"
 
+const std::string RenderSystem::LogCategory = "D3D12_Renderer";
 
-RenderSystem::RenderSystem(WindowBase* InAssociatedWindow)
+RenderSystem::RenderSystem(std::shared_ptr<SpawnableWindow> InAssociatedWindow)
 {
 	DX12Data.AssociatedWindow = InAssociatedWindow;
 }
@@ -20,16 +23,18 @@ void RenderSystem::AsyncInit()
 	}
 	if (!DX12Data.Init())
 	{
-		//TODO - Error Message here (Add Log System)
+		Logger::Log(Logger::ELogCategories::Critical, "RenderSystem::AsyncInit Structure 'FDX12Data' couldn't initialize. Aborting render system initialization;", RenderSystem::LogCategory);
 		__debugbreak();
 		return;
 	}
+
+	if (DX12Data.AssociatedWindow.get())
+		DX12Data.AssociatedWindow->OnWindowResizeDelegate.Bind(shared_from_this(), &RenderSystem::OnWindowResizedEvent);
 }
 
+float timer = 0;
 void RenderSystem::AsyncTick(float Delta)
 {
-	
-	
 }
 
 #pragma region DX12
@@ -101,11 +106,11 @@ void RenderSystem::FDX12Data::ResizeSwapChain(FVector2 NewResolution)
 		BackBuffers[i].Reset();
 	}
 
-	HRESULT Res = SwapChain->ResizeBuffers(BufferCount, NewResolution.GetX(), NewResolution.GetY(), DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	HRESULT Res = SwapChain->ResizeBuffers(BufferCount, (int)NewResolution.GetX(), (int)NewResolution.GetY(), DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 	if (FAILED(Res))
 	{
 		__debugbreak();
-		//TODO - Log error
+		Logger::Log(Logger::ELogCategories::Error, "RenderSystem::FDX12Data::ResizeSwapChain Failed to resize swapchain buffers;", RenderSystem::LogCategory);
 	}
 
 	CreateRTVs();
@@ -159,7 +164,7 @@ bool RenderSystem::FDX12Data::CreateDX12Device()
 
 	if (Res < 0)
 	{
-		//TODO - Log Error Message here (Add Log System)
+		Logger::Log(Logger::ELogCategories::Critical, "RenderSystem::FDX12Data::CreateDX12Device Could not create a factory", RenderSystem::LogCategory);
 		__debugbreak();
 		return false;
 	}
@@ -204,7 +209,7 @@ bool RenderSystem::FDX12Data::CreateCommandQueues()
 
 		if (Res < 0)
 		{
-			//TODO - Log Error Message here (Add Log System)
+			Logger::Log(Logger::ELogCategories::Critical, "RenderSystem::FDX12Data::CreateCommandQueues Failed to create a command queue.", RenderSystem::LogCategory);
 			__debugbreak();
 			return false;
 		}

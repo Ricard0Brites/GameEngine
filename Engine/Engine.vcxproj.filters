@@ -27,22 +27,25 @@
     <ClCompile Include="Core\DataTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Actor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Systems\Render\RenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Systems\Render\Object\IRenderableObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Object\Actor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Object\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Spawnable\SpawnableWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,16 +56,7 @@
     <ClInclude Include="Core\Delegate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\DataTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Actor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\ThreadedTask.hpp">
@@ -77,23 +71,35 @@
     <ClInclude Include="Systems\Render\RenderTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\EngineStatics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Systems\Collision\CollisionSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IO\IO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameplayStatics.hpp">
+    <ClInclude Include="GameplayStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Systems\Render\Object\IRenderableObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Object\Actor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Object\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Spawnable\SpawnableWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Systems\Render\Shader\BasicShader.hlsl" />
   </ItemGroup>
 </Project>

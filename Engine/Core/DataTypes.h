@@ -12,12 +12,10 @@ inline EnumType operator ~ (const EnumType& A) { return static_cast<EnumType>(~s
 inline bool operator == (const EnumType& A, const UnderlyingTypeOf_##EnumType B) { return (static_cast<UnderlyingTypeOf_##EnumType>(A) == B); }\
 inline bool operator != (const EnumType& A, const UnderlyingTypeOf_##EnumType B) { return (static_cast<UnderlyingTypeOf_##EnumType>(A) != B); }
 
-
-// Redefined in core.h but to avoid a circular dependency this is here
 #ifdef EXPORTS_ENGINE
-#define ENGINE_API __declspec(dllexport)
+#define ENGINE_API 
 #else
-#define ENGINE_API __declspec(dllimport)
+#define ENGINE_API 
 #endif
 
 enum class ELifeCycleState : uint8_t

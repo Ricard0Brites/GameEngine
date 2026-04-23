@@ -1,5 +1,5 @@
-#pragma once
-#include "Core/Core.h" // DLL, iostream
+#include "Core/Core.h"
+#include <string>
 #include <type_traits>
 
 class ENGINE_API Object
@@ -27,7 +27,7 @@ public:
 		Object* GetOwner();
 		bool GetIsPendingKill();
 
-		// TODO - Add as needed
+		// NOTE - Add as needed
 
 	#pragma endregion
 

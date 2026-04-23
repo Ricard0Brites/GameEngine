@@ -12,19 +12,24 @@
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 #include <unordered_map>
+#include <string>
+#include <memory>
 
 
-
-class ENGINE_API RenderSystem final : public ThreadedTask
+class ENGINE_API RenderSystem final : public ThreadedTask, public std::enable_shared_from_this<RenderSystem>
 {
 
 public:
-    RenderSystem(class WindowBase* InAssociatedWindow);
+    RenderSystem(std::shared_ptr<class SpawnableWindow> InAssociatedWindow);
     void OnWindowResizedEvent(FVector2 NewResolution);
 
-
 private:
+	#pragma region Debug
+
+	static const std::string LogCategory;
 	FORCEINLINE bool IsDebugEnabled();
+
+	#pragma endregion
 
 	void AsyncTick(float Delta) override;
 	void AsyncInit() override;
@@ -38,6 +43,7 @@ private:
 			- Fence
 		*/
 		FDX12Data() = default;
+		~FDX12Data() = default;
 
 		// Returns true if all resources have been successfully created
 		bool Init();
@@ -49,7 +55,7 @@ private:
 		Microsoft::WRL::ComPtr<ID3D12Fence1> GetFence() { return Fence; }
 		const Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain() { return SwapChain; }
 
-		WindowBase* AssociatedWindow = nullptr;
+		std::shared_ptr<SpawnableWindow> AssociatedWindow = nullptr;
 
 	private:
 		void WaitForGPU(D3D12_COMMAND_LIST_TYPE CommandListType);
@@ -69,7 +75,8 @@ private:
 
 		bool IsValid = false;
 
-#pragma region Swapchain
+		#pragma region Swapchain
+
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain = nullptr;
 		uint32_t FrameIndex = 0;
 		static const UINT BufferCount = 3; // 0 - Being Shown 1 & 2 switch turns being rendered
@@ -77,9 +84,10 @@ private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> BackBuffers[BufferCount];
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RTVHeap = nullptr;
 		UINT RTVDescriptorSize = 0;
-#pragma endregion
+		
+		#pragma endregion
 
-#pragma region Helpers
+		#pragma region Helpers
 
 		bool SupportsDX12();
 		bool CreateDX12Device();
@@ -87,7 +95,7 @@ private:
 		bool CreateFence();
 		bool CreateSwapchain(const HWND* WindowHandle);
 
-#pragma endregion
+		#pragma endregion
 	};
 	static FDX12Data DX12Data;
 

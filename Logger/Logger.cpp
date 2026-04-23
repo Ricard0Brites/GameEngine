@@ -1,11 +1,10 @@
 #include "Logger.h"
 #include <iostream>
-#include <filesystem>
 #include <fstream>
+#include <filesystem>
 #include <chrono>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
+
+
 
 std::map<Logger::ELogCategories, std::string> Logger::ColorMap =
 {

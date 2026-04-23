@@ -1,19 +1,8 @@
 #include "WindowBase.h"
 #include <string>
 
-// --- PImpl Definition ---
-struct WindowBase::WindowBaseImpl
-{
-    // Window properties
-    const WCHAR* WindowTitle = nullptr;
-    const WCHAR* ClassName = nullptr;
-    std::wstring ClassNameCache; // To hold the generated class name string
-    HWND WindowHandle = nullptr;
-    FVector2 Resolution = 0;
-};
-
 // --- Free Functions for Window Logic ---
-bool RegisterWindowClass(WindowBase::WindowBaseImpl* Pimpl)
+bool RegisterWindowClass(WindowBase::FWindowBaseData* Pimpl)
 {
     WNDCLASSEX WindowClassEX;
     WindowClassEX.lpfnWndProc = &WinProc;
@@ -38,7 +27,7 @@ bool RegisterWindowClass(WindowBase::WindowBaseImpl* Pimpl)
     return true;
 }
 
-bool CreateWindowInstance(WindowBase::WindowBaseImpl* Pimpl)
+bool CreateWindowInstance(WindowBase::FWindowBaseData* Pimpl)
 {
     if (!Pimpl)
         return false;
@@ -137,39 +126,38 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 // --- WindowBase Method Implementations ---
 
 WindowBase::WindowBase(const WCHAR* InWindowTitle)
-    : Pimpl(new WindowBaseImpl)
+    : WindowData(std::make_unique<FWindowBaseData>())
 {
-    Pimpl->WindowTitle = InWindowTitle;
-    Pimpl->ClassNameCache = L"WindowClass_" + std::to_wstring(WindowIDRunningCount++);
-    Pimpl->ClassName = Pimpl->ClassNameCache.c_str();
+    WindowData.get()->WindowTitle = InWindowTitle;
+    WindowData.get()->ClassNameCache = L"WindowClass_" + WindowIDRunningCount++;
+    WindowData.get()->ClassName = WindowData.get()->ClassNameCache.c_str();
 
-    RegisterWindowClass(Pimpl);
-    CreateWindowInstance(Pimpl);
-    WindowsList.insert({ Pimpl->WindowHandle, this });
-    UpdateWindow(Pimpl->WindowHandle);
-    ShowWindow(Pimpl->WindowHandle, SW_SHOW);
+    RegisterWindowClass(WindowData.get());
+    CreateWindowInstance(WindowData.get());
+    WindowsList.insert({ WindowData.get()->WindowHandle, this });
+    UpdateWindow(WindowData.get()->WindowHandle);
+    ShowWindow(WindowData.get()->WindowHandle, SW_SHOW);
 }
 
 WindowBase::~WindowBase()
 {
-    if (Pimpl)
+    if (WindowData.get())
     {
-        if(Pimpl->WindowHandle)
-            DestroyWindow(Pimpl->WindowHandle);
+        if(WindowData.get()->WindowHandle)
+            DestroyWindow(WindowData.get()->WindowHandle);
      
-        delete(Pimpl);
-        Pimpl = nullptr;
+        WindowData.reset();        
     }
 }
 
 HWND* WindowBase::GetWindow()
 {
-    return &Pimpl->WindowHandle;
+    return &WindowData.get()->WindowHandle; // TODO - turn into unique ptr
 }
 
 const FVector2& WindowBase::GetResolution()
 {
-    return Pimpl->Resolution;
+    return WindowData.get()->Resolution;
 }
 
 void WindowBase::Internal_BroadcastWindowSize(const HWND& hWnd)
@@ -180,7 +168,7 @@ void WindowBase::Internal_BroadcastWindowSize(const HWND& hWnd)
     {
         FVector2 NewResolution = FVector2((float)(r.right - r.left), (float)(r.bottom - r.top));
         OnWindowResizeDelegate.Execute(NewResolution);
-        Pimpl->Resolution = NewResolution;
+        WindowData.get()->Resolution = NewResolution;
     }
 
     // Reset Dirtiness
@@ -197,14 +185,19 @@ void WindowBase::PumpMessages()
         if (msg.message == WM_QUIT)
         {
             OnDestroy();
-            if (Pimpl->WindowHandle)
+            if (WindowData.get()->WindowHandle)
             {
-                DestroyWindow(Pimpl->WindowHandle);
-                Pimpl->WindowHandle = nullptr;
+                DestroyWindow(WindowData.get()->WindowHandle);
+                WindowData.get()->WindowHandle = nullptr;
             }
         }
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+}
+
+void WindowBase::SetWindowName(std::wstring Title)
+{
+    WindowData->WindowTitle = Title.c_str();
 }

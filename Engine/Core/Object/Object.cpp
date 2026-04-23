@@ -60,7 +60,6 @@ void Object::FObjectData::SetPendingKill()
 
 #pragma endregion
 
-
 template<typename T> requires std::is_base_of_v<Object, T>
 T* Object::FObjectData::CreateChildOfClass()
 {

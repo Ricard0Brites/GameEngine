@@ -5,80 +5,76 @@
 
 class ENGINE_API ThreadedTask
 {
-    friend class Engine; // The only one allowed to call ThreadedTask::Join()
+    friend class Engine; // The only one allowed to call ThreadedTask::StopThread()
 public:
+    #pragma region Exposed Task Events
+
     virtual void AsyncTick(float Delta) = 0;
     virtual void AsyncInit() = 0;
+
+    #pragma endregion
     
-    ThreadedTask() : TaskData(new FData)
+    ThreadedTask() : TaskData(std::make_unique<FData>())
     {
         Init();
     }
 
-    virtual ~ThreadedTask()
+    ~ThreadedTask()
     {
-        if (TaskData)
-        {
-            if (TaskData->Thread)
-            {
-                delete(TaskData->Thread);
-                TaskData->Thread = nullptr;
-            }
-
-            delete(TaskData);
-            TaskData = nullptr;
-        }
+        Join(); // Join the thread before self is destroyed
     }
-    
-    Delegate<std::string> OnEventDispatch;
 
 private:
 
-    // Starts the async execution
-    void Init();
-    //Runs the async loop
-    void Async_Init();
-    
-    bool IsRunning() { return TaskData->IsRunning; };
-    
-    void StopThread() { TaskData->IsRunning = false;  }
-    
-    void Join();
+    // Internal synchronous execution -> Parent thread
+    void Init()
+    {
+        TaskData->IsRunning = true;
+        TaskData->Thread = std::make_unique<std::thread>(&ThreadedTask::Async_Init, this);
+    }
 
+    // Internal asynchronous loop -> New Thread
+    void Async_Init()
+    {
+        AsyncInit();
 
+        // Tick
+        std::chrono::steady_clock::time_point PreviousFrame = std::chrono::high_resolution_clock::now();
+        while (IsRunning())
+        {
+            std::chrono::steady_clock::time_point CurrentFrame = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> DeltaTime = CurrentFrame - PreviousFrame;
+            PreviousFrame = CurrentFrame;
+
+            AsyncTick(DeltaTime.count());
+        }
+    }
+    
+    inline bool IsRunning() 
+    {
+        return TaskData->IsRunning; 
+    };
+    
+    inline void StopThread() 
+    { 
+        TaskData->IsRunning = false;  
+    }
+    
+    inline void Join()
+    {
+        if(TaskData.get() && TaskData->Thread.get())
+            TaskData->Thread->join();
+    }
+
+    #pragma region Pointer To Implementation
+    
     struct FData
     {
-        FData() = default;
-        std::thread* Thread = nullptr; // Friend declaration allows the engine to access 
+        std::unique_ptr<std::thread> Thread = nullptr; // Friend declaration allows the engine to access 
         bool IsRunning = false;
     };
-    FData* TaskData = nullptr;
+
+    std::unique_ptr<FData> TaskData = nullptr;
+
+    #pragma endregion
 };
-
-inline void ThreadedTask::Join()
-{
-    if (TaskData->Thread)
-        TaskData->Thread->join();
-}
-
-inline void ThreadedTask::Init()
-{
-    TaskData->IsRunning = true;
-    TaskData->Thread = new std::thread(&ThreadedTask::Async_Init, this);
-}
-
-inline void ThreadedTask::Async_Init()
-{
-    AsyncInit();
-
-    // Tick
-    std::chrono::steady_clock::time_point PreviousFrame = std::chrono::high_resolution_clock::now();
-    while (IsRunning())
-    {
-        std::chrono::steady_clock::time_point CurrentFrame = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float> DeltaTime = CurrentFrame - PreviousFrame;
-        PreviousFrame = CurrentFrame;
-
-        AsyncTick(DeltaTime.count());
-    }
-}

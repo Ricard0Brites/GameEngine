@@ -20,13 +20,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,6 +70,11 @@
       <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Logger.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3d12.lib;
+dxgi.lib;Logger.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -88,34 +93,40 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3d12.lib;
+dxgi.lib;Logger.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\DataTypes.cpp" />
-    <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Core\Object\Actor.cpp" />
+    <ClCompile Include="Core\Object\Object.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp" />
-    <ClCompile Include="Object\Actor.cpp" />
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Systems\Render\Object\IRenderableObject.cpp" />
     <ClCompile Include="Systems\Render\RenderSystem.cpp" />
+    <ClCompile Include="Windows\Spawnable\SpawnableWindow.cpp" />
     <ClCompile Include="Windows\WindowBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\DataTypes.h" />
     <ClInclude Include="Core\Delegate.h" />
-    <ClInclude Include="Core\EngineStatics.h" />
+    <ClInclude Include="Core\Object\Actor.h" />
+    <ClInclude Include="Core\Object\Object.h" />
     <ClInclude Include="Core\ThreadedTask.hpp" />
-    <ClInclude Include="GameplayStatics.hpp" />
+    <ClInclude Include="GameplayStatics.h" />
     <ClInclude Include="IO\IO.h" />
     <ClInclude Include="Systems\Collision\CollisionSystem.h" />
-    <ClInclude Include="Object\Actor.h" />
-    <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Systems\Physics\PhysicsSystem.h" />
     <ClInclude Include="Systems\Render\Object\IRenderableObject.h" />
     <ClInclude Include="Systems\Render\RenderSystem.h" />
     <ClInclude Include="Systems\Render\RenderTypes.h" />
+    <ClInclude Include="Windows\Spawnable\SpawnableWindow.h" />
     <ClInclude Include="Windows\WindowBase.h" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +136,9 @@
     <ProjectReference Include="..\Logger\Logger.vcxproj">
       <Project>{f29c54a8-0b3f-45d9-adba-e807f2b34118}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Systems\Render\Shader\BasicShader.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

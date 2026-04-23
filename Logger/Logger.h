@@ -1,12 +1,11 @@
 #pragma once
-#include <vector>
 #include <string>
 #include <map>
 
 #ifdef LOGGER_EXPORTS
-#define LOGGER_API __declspec(dllexport)
+#define LOGGER_API 
 #else
-#define LOGGER_API __declspec(dllimport)
+#define LOGGER_API 
 #endif
 
 class Logger
@@ -27,8 +26,8 @@ public:
 		Custom3		= 1 << 7
 	};
 
-	LOGGER_API inline static void Log(ELogCategories LogLevel, std::string Message, std::string SystemTag);
-	LOGGER_API inline static void Clear();
+	LOGGER_API static void Log(ELogCategories LogLevel, std::string Message, std::string SystemTag);
+	LOGGER_API static void Clear();
 
 private:
 	static void WriteToLog(std::string SystemTag, const std::string& Content);
