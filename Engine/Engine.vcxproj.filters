@@ -48,6 +48,9 @@
     <ClCompile Include="Systems\Render\Component\RenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Systems\Render\DX12TypeWrappers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\WindowBase.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Statics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Render\DX12TypeWrappers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

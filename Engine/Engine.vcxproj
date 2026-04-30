@@ -108,6 +108,7 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp" />
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Systems\Render\Component\RenderComponent.cpp" />
+    <ClCompile Include="Systems\Render\DX12TypeWrappers.cpp" />
     <ClCompile Include="Systems\Render\RenderSystem.cpp" />
     <ClCompile Include="Windows\Spawnable\SpawnableWindow.cpp" />
     <ClCompile Include="Windows\WindowBase.cpp" />
@@ -125,6 +126,7 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClInclude Include="Systems\Collision\CollisionSystem.h" />
     <ClInclude Include="Systems\Physics\PhysicsSystem.h" />
     <ClInclude Include="Systems\Render\Component\RenderComponent.h" />
+    <ClInclude Include="Systems\Render\DX12TypeWrappers.h" />
     <ClInclude Include="Systems\Render\RenderSystem.h" />
     <ClInclude Include="Systems\Render\RenderTypes.h" />
     <ClInclude Include="Windows\Spawnable\SpawnableWindow.h" />
