@@ -107,7 +107,7 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClCompile Include="Engine.h" />
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp" />
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp" />
-    <ClCompile Include="Systems\Render\Object\IRenderableObject.cpp" />
+    <ClCompile Include="Systems\Render\Component\RenderComponent.cpp" />
     <ClCompile Include="Systems\Render\RenderSystem.cpp" />
     <ClCompile Include="Windows\Spawnable\SpawnableWindow.cpp" />
     <ClCompile Include="Windows\WindowBase.cpp" />
@@ -118,12 +118,13 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClInclude Include="Core\Delegate.h" />
     <ClInclude Include="Core\Object\Actor.h" />
     <ClInclude Include="Core\Object\Object.h" />
+    <ClInclude Include="Core\Statics.h" />
     <ClInclude Include="Core\ThreadedTask.hpp" />
     <ClInclude Include="GameplayStatics.h" />
     <ClInclude Include="IO\IO.h" />
     <ClInclude Include="Systems\Collision\CollisionSystem.h" />
     <ClInclude Include="Systems\Physics\PhysicsSystem.h" />
-    <ClInclude Include="Systems\Render\Object\IRenderableObject.h" />
+    <ClInclude Include="Systems\Render\Component\RenderComponent.h" />
     <ClInclude Include="Systems\Render\RenderSystem.h" />
     <ClInclude Include="Systems\Render\RenderTypes.h" />
     <ClInclude Include="Windows\Spawnable\SpawnableWindow.h" />

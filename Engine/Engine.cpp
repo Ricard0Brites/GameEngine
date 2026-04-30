@@ -1,13 +1,11 @@
 #include "Engine.h"
 #include <memory>
-
-
 #include "Windows/Spawnable/SpawnableWindow.h"
 #include "Systems/Collision/CollisionSystem.h"
 #include "Systems/Physics/PhysicsSystem.h"
 #include "Systems/Render/RenderSystem.h"
 
-#pragma region Construction & Destruction
+#pragma region Construction And Destruction
 
 Engine::Engine() : EngineData(std::make_unique<FEngineData>())
 {
@@ -26,23 +24,23 @@ void Engine::Init()
     if (!EngineInstance.get())
         __debugbreak();
 
-    #pragma region Spawn Window
+#pragma region Spawn Window
 
     EngineData->Window = std::make_shared<SpawnableWindow>();
 
     if (SpawnableWindow* w = EngineData->Window.get())
         w->OnWindowDestroyedDelegate.Bind(EngineInstance, &Engine::Quit);
 
-    #pragma endregion
+#pragma endregion
 
-    #pragma region Spawn Systems
+#pragma region Spawn Systems
 
     // Create Base Systems
     CreateThreadedTask<RenderSystem>(EngineData->Window);
     CreateThreadedTask<PhysicsSystem>();
     CreateThreadedTask<CollisionSystem>();
 
-    #pragma endregion
+#pragma endregion
 }
 
 void Engine::Launch()
@@ -86,7 +84,7 @@ std::shared_ptr<T> Engine::CreateThreadedTask(Args ...args)
 {
     // Emplace back directly constructs the unique_ptr in the vector
     std::shared_ptr<T> NewTask = std::make_shared<T>(args...);
-    if(EngineData.get())
+    if (EngineData.get())
         EngineData->Tasks.push_back(NewTask);
 
     return NewTask;
@@ -94,7 +92,7 @@ std::shared_ptr<T> Engine::CreateThreadedTask(Args ...args)
 
 void Engine::StopThreads()
 {
-    for (const std::shared_ptr<ThreadedTask> &Task : EngineData->Tasks)
+    for (const std::shared_ptr<ThreadedTask>& Task : EngineData->Tasks)
     {
         if (Task)
             Task->StopThread();

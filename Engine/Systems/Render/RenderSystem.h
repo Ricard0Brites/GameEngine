@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <map>
 
 
 class ENGINE_API RenderSystem final : public ThreadedTask, public std::enable_shared_from_this<RenderSystem>
@@ -33,7 +34,7 @@ private:
 
 	void AsyncTick(float Delta) override;
 	void AsyncInit() override;
-
+public:
 	struct FDX12Data
 	{
 		/* 
@@ -72,7 +73,6 @@ private:
 			{D3D12_COMMAND_LIST_TYPE_COPY, nullptr}
 		};
 
-
 		bool IsValid = false;
 
 		#pragma region Swapchain
@@ -96,6 +96,14 @@ private:
 		bool CreateSwapchain(const HWND* WindowHandle);
 
 		#pragma endregion
+
+		#pragma region PSO
+
+	private:
+		// map < HashedPSOKey, std::vector<PSO> > PSOCache;
+
+		#pragma endregion
+
 	};
 	static FDX12Data DX12Data;
 
