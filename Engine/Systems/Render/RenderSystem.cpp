@@ -57,39 +57,39 @@ void RenderSystem::OnWindowResizedEvent(FVector2 NewResolution)
 
 bool RenderSystem::FDX12Data::Init()
 {
-
 	if (!CreateDX12Device())
 	{
 		__debugbreak();
-		//Debug("Could Not Create D3D12 Device RenderSystem::FDX12Data::Init()");
+		Logger::Log(Logger::ELogCategories::Critical, "Could Not Create D3D12 Device RenderSystem::FDX12Data::Init()", LogCategory);
 		return IsValid;
 	}
 
 	if (!SupportsDX12())
 	{
 		__debugbreak();
-		//Debug("System Does Not Support DirectX 12");
+		Logger::Log(Logger::ELogCategories::Critical, "System Does Not Support DirectX 12", LogCategory);
 		return IsValid;
 	}
 
 	if (!CreateCommandQueues())
 	{
 		__debugbreak();
-		//Debug("Could Not Create Command Queue RenderSystem::FDX12Data::Init()");
+		Logger::Log(Logger::ELogCategories::Critical, "Could Not Create Command Queue RenderSystem::FDX12Data::Init()", LogCategory);
 		return IsValid;
 	}
 
 	if (!CreateFence())
 	{
 		__debugbreak();
-		//Debug("Could not Create Fence RenderSystem::FDX12Data::Init()");
+		Logger::Log(Logger::ELogCategories::Critical, "Could not Create Fence RenderSystem::FDX12Data::Init()", LogCategory);
+
 		return IsValid;
 	}
 
 	if (!(AssociatedWindow && CreateSwapchain(AssociatedWindow->GetWindow())))
 	{
 		__debugbreak();
-		//Debug("Could not Create Swapchain RenderSystem::FDX12Data::Init()");
+		Logger::Log(Logger::ELogCategories::Critical, "Could not Create Swapchain RenderSystem::FDX12Data::Init()", LogCategory);
 		return IsValid;
 	}
 	

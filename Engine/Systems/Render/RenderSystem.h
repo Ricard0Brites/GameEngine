@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/ThreadedTask.hpp"
+#include "DX12TypeWrappers.h"
 
 // DirectX 12
 #ifndef WIN32_LEAN_AND_MEAN
@@ -17,7 +18,10 @@
 #include <map>
 
 
-class ENGINE_API RenderSystem final : public ThreadedTask, public std::enable_shared_from_this<RenderSystem>
+class ENGINE_API RenderSystem final : 
+	public ThreadedTask,
+	public std::enable_shared_from_this<RenderSystem>
+
 {
 
 public:
@@ -34,6 +38,7 @@ private:
 
 	void AsyncTick(float Delta) override;
 	void AsyncInit() override;
+
 public:
 	struct FDX12Data
 	{
@@ -97,10 +102,10 @@ public:
 
 		#pragma endregion
 
-		#pragma region PSO
+		#pragma region Pipeline State Object
 
 	private:
-		// map < HashedPSOKey, std::vector<PSO> > PSOCache;
+		std::map<FPipelineStateObject, std::vector<Microsoft::WRL::ComPtr<ID3D12PipelineState>>> PSOCache;
 
 		#pragma endregion
 
