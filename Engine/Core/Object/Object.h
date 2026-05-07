@@ -16,6 +16,8 @@ protected:
 	// Pimpl - Pointer to implementation (DLL linkage warning removal)
 	struct FObjectData;
 	FObjectData* ObjectData = nullptr;
+
+private:
 };
 
 struct Object::FObjectData
