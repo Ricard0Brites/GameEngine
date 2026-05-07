@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/ThreadedTask.hpp"
 
-class ENGINE_API PhysicsSystem : public ThreadedTask
+class PhysicsSystem : public ThreadedTask
 {
 public:
     PhysicsSystem();

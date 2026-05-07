@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/ThreadedTask.hpp"
 
-class ENGINE_API CollisionSystem : public ThreadedTask
+class CollisionSystem : public ThreadedTask
 {
 public:
 	CollisionSystem();

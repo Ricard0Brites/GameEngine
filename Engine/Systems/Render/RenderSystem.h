@@ -18,7 +18,7 @@
 #include <map>
 
 
-class ENGINE_API RenderSystem final : 
+class RenderSystem final : 
 	public ThreadedTask,
 	public std::enable_shared_from_this<RenderSystem>
 

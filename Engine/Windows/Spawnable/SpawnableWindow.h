@@ -4,7 +4,7 @@
 #include "Windows/WindowBase.h" // WindowBase
 
 // TODO - Finish implementing SpawnableWindow
-class ENGINE_API SpawnableWindow : public WindowBase
+class SpawnableWindow : public WindowBase
 {
 	#pragma region Constructor & Destructor
 public:

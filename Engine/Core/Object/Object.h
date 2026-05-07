@@ -2,7 +2,7 @@
 #include <string>
 #include <type_traits>
 
-class ENGINE_API Object
+class Object
 {
 	
 public:

@@ -78,11 +78,11 @@ private:
     std::vector<std::unique_ptr<BaseEntry>> Entries;
 };
 
-#define DECLARE_DELEGATE(DLLAPI, DelegateName) template<typename... Args>\
-class DLLAPI F##DelegateName\
-{struct DLLAPI BaseEntry{virtual ~BaseEntry() = default;virtual void Execute(Args... args) = 0;virtual bool IsExpired() const = 0;};\
-template<typename T>struct DLLAPI Entry : BaseEntry\
-{std::weak_ptr<T> Object;void (T::* Method)(Args...);Entry(DLLAPI std::shared_ptr<T> obj, void (T::* method)(Args...)): Object(obj), Method(method) {}\
+#define DECLARE_DELEGATE(DelegateName) template<typename... Args>\
+class F##DelegateName\
+{struct BaseEntry{virtual ~BaseEntry() = default;virtual void Execute(Args... args) = 0;virtual bool IsExpired() const = 0;};\
+template<typename T>struct Entry : BaseEntry\
+{std::weak_ptr<T> Object;void (T::* Method)(Args...);Entry(std::shared_ptr<T> obj, void (T::* method)(Args...)): Object(obj), Method(method) {}\
 void Execute(Args... args) override{if (auto shared_obj = Object.lock()){(shared_obj.get()->*Method)(args...);}}\
 bool IsExpired() const override{return Object.expired();}};\
 public:F##DelegateName() = default;~F##DelegateName() = default;\

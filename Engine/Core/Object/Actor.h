@@ -4,7 +4,7 @@
 #include "Core\Core.h"
 #include <vector>
 
-class ENGINE_API Actor : 
+class Actor : 
 	public Object,
 	public FTransform
 {

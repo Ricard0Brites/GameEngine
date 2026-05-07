@@ -3,7 +3,7 @@
 #include <chrono>
 #include <thread>
 
-class ENGINE_API ThreadedTask
+class ThreadedTask
 {
     friend class Engine; // The only one allowed to call ThreadedTask::StopThread()
 public:

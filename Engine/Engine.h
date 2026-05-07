@@ -9,7 +9,7 @@ class Object;
 template <typename T>
 concept DerivedFromThreadedTask = std::is_base_of_v<ThreadedTask, T>;
 
-class ENGINE_API Engine : private std::enable_shared_from_this<Engine>
+class Engine : private std::enable_shared_from_this<Engine>
 {
 public:
     Engine();

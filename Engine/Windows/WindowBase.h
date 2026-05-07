@@ -11,13 +11,13 @@ static int WindowIDRunningCount = 0;
 
 #pragma endregion
 
-class ENGINE_API WindowBase
+class WindowBase
 {
 public:
     WindowBase(const WCHAR* InWindowTitle);
     ~WindowBase();
 
-    DECLARE_DELEGATE(ENGINE_API, WindowBaseDelegate);
+    DECLARE_DELEGATE(WindowBaseDelegate);
 
     #pragma region Events
 

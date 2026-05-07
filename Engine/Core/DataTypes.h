@@ -12,12 +12,6 @@ inline EnumType operator ~ (const EnumType& A) { return static_cast<EnumType>(~s
 inline bool operator == (const EnumType& A, const UnderlyingTypeOf_##EnumType B) { return (static_cast<UnderlyingTypeOf_##EnumType>(A) == B); }\
 inline bool operator != (const EnumType& A, const UnderlyingTypeOf_##EnumType B) { return (static_cast<UnderlyingTypeOf_##EnumType>(A) != B); }
 
-#ifdef EXPORTS_ENGINE
-#define ENGINE_API 
-#else
-#define ENGINE_API 
-#endif
-
 enum class ELifeCycleState : uint8_t
 {
 	Uninitialized = 0,
@@ -27,7 +21,7 @@ enum class ELifeCycleState : uint8_t
 
 }; ENUM_CLASS_FLAGS(ELifeCycleState);
 
-struct ENGINE_API FVector
+struct FVector
 {
 private:
 	mutable std::recursive_mutex _Mutex;
@@ -178,7 +172,7 @@ public:
 	}
 };
 
-struct ENGINE_API FVector2
+struct FVector2
 {
 private:
 	mutable std::recursive_mutex _Mutex;
@@ -320,7 +314,7 @@ public:
 	}
 };
 
-struct ENGINE_API FTransform
+struct FTransform
 {
 private:
 	mutable std::mutex _locationMutex;
@@ -376,7 +370,7 @@ public:
 
 };
 
-struct ENGINE_API FColor
+struct FColor
 {
 	float R = 0.f, G = 0.f, B = 0.f, A = 1.f;
 };
