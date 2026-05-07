@@ -2,22 +2,13 @@
 
 Object::Object(Object* InOwner)
 {
-	ObjectData = new FObjectData;
+	ObjectData = std::make_unique<FObjectData>();
 	ObjectData->SetOwner(InOwner);
 }
 
 Object::Object(Object* InOwner, const char* InDisplayName) : Object(InOwner)
 {
 	ObjectData->SetDisplayName(InDisplayName);
-}
-
-Object::~Object()
-{
-	if (ObjectData)
-	{
-		delete ObjectData;
-		ObjectData = nullptr;
-	}
 }
 
 #pragma region FObjectData Structure
@@ -60,10 +51,13 @@ void Object::FObjectData::SetPendingKill()
 
 #pragma endregion
 
-template<typename T> requires std::is_base_of_v<Object, T>
-T* Object::FObjectData::CreateChildOfClass()
+template<typename T>
+requires std::is_base_of_v<Object, T>
+std::shared_ptr<T> Object::FObjectData::CreateChildOfClass()
 {
-	return nullptr; //TODO
+	std::shared_ptr<T> tmp = std::make_shared<T>();
+	Engine::Objects.push_back(tmp);
+	return tmp;
 }
 
 #pragma endregion

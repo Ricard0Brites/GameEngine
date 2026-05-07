@@ -8,14 +8,13 @@ class Object
 public:
 	Object(Object* InOwner);
 	Object(Object* InOwner, const char* InDisplayName);
-	virtual ~Object();
 	virtual void BeginPlay() = 0;
 	virtual void Tick(float DeltaSeconds) = 0;
 
 protected:
 	// Pimpl - Pointer to implementation (DLL linkage warning removal)
 	struct FObjectData;
-	FObjectData* ObjectData = nullptr;
+	std::unique_ptr<FObjectData> ObjectData = nullptr;
 
 private:
 };
@@ -40,7 +39,7 @@ public:
 	#pragma endregion
 
 	template<typename T> requires std::is_base_of_v<Object, T>
-	T* CreateChildOfClass();
+	std::shared_ptr<T> CreateChildOfClass();
 
 private:
 	// Name of the object
