@@ -8,50 +8,57 @@ class Object
 public:
 	Object(Object* InOwner);
 	Object(Object* InOwner, const char* InDisplayName);
-	virtual ~Object();
 	virtual void BeginPlay() = 0;
 	virtual void Tick(float DeltaSeconds) = 0;
+	uint64_t GetGID() { return ObjectData.GetGID(); }
+
 
 protected:
-	// Pimpl - Pointer to implementation (DLL linkage warning removal)
-	struct FObjectData;
-	FObjectData* ObjectData = nullptr;
+	struct FObjectData
+	{
+	public:
+		FObjectData();
 
-private:
-};
-
-struct Object::FObjectData
-{
-public:
-	#pragma region Getters
+		#pragma region Getters
 
 		const std::string& GetDisplayName();
 		Object* GetOwner();
 		bool GetIsPendingKill();
+		uint64_t GetGID();
 
 		// NOTE - Add as needed
 
-	#pragma endregion
+		#pragma endregion
 
-	#pragma region Setters
+		#pragma region Setters
+
 		void SetDisplayName(const char* InName);
-		void SetOwner(Object *InOwner);
+		void SetOwner(Object* InOwner);
 		void SetPendingKill();
-	#pragma endregion
+		void OnInitializedStarted();
+		void OnInitializedFinished();
 
-	template<typename T> requires std::is_base_of_v<Object, T>
-	T* CreateChildOfClass();
+		#pragma endregion
 
-private:
-	// Name of the object
-	std::string DisplayName = "";
+		template<typename T> requires std::is_base_of_v<Object, T>
+		std::shared_ptr<T> CreateChildOfClass();
 
-	// List of children (We own them via unique ptr)
-	std::vector<std::unique_ptr<Object>> Children = {};
+	private:
+		// Name of the object
+		std::string DisplayName = "";
 
-	//nullptr id means this object is independent
-	Object* Owner = nullptr;
+		// List of children (We own them via unique ptr)
+		std::vector<std::unique_ptr<Object>> Children = {};
 
-	// Defines if the object is going to be destroyed or not (TODO - WIP GC)
-	ELifeCycleState LifecycleState = ELifeCycleState::Uninitialized;
+		//nullptr id means this object is independent
+		Object* Owner = nullptr;
+
+		// Defines if the object is going to be destroyed or not (TODO - WIP GC)
+		ELifeCycleState LifecycleState = ELifeCycleState::Uninitialized;
+
+		uint64_t GlobalID = -1;
+
+		static uint64_t GlobalIDCounter;
+	};
+	FObjectData ObjectData;
 };

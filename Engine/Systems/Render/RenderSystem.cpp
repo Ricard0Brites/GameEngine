@@ -1,11 +1,18 @@
 #include "RenderSystem.h"
+#include "Component/RenderComponent.h"
+
 #include <iostream>
 #include <utility>
-#include "Logger.h"
 #include <memory>
-#include "Windows/Spawnable/SpawnableWindow.h"
 
+#include "Logger.h"
+#include "Windows/Spawnable/SpawnableWindow.h"
+#include "Core/Object/Object.h"
+
+// Static Initializations
 const std::string RenderSystem::LogCategory = "D3D12_Renderer";
+std::vector<RenderComponent> RenderSystem::RenderComponentsCache = {};
+uint64_t RenderSystem::ComponentIDCounter = 0;
 
 RenderSystem::RenderSystem(std::shared_ptr<SpawnableWindow> InAssociatedWindow)
 {
@@ -291,6 +298,20 @@ bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 	CreateRTVs();
 
 	return true;
+}
+
+#pragma endregion
+
+#pragma region Rendering
+
+RenderComponent* RenderSystem::CreateRenderComponent(Object* Owner)
+{
+	if (!Owner)
+		return nullptr;
+
+	RenderComponent* Comp = &RenderComponentsCache.emplace_back(Owner->GetGID());
+	
+	return Comp;
 }
 
 #pragma endregion

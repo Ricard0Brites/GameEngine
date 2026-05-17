@@ -2,18 +2,21 @@
 #include "Core/Core.h"
 #include "Windows/Spawnable/SpawnableWindow.h"
 #include <vector>
+#include <type_traits>
 
 class ThreadedTask;
-class Object;
+class Actor;
 
 template <typename T>
 concept DerivedFromThreadedTask = std::is_base_of_v<ThreadedTask, T>;
 
+template <typename T>
+concept DerivedFromActor = std::is_base_of_v<Actor, T>;
+
 class Engine : private std::enable_shared_from_this<Engine>
 {
 public:
-    Engine();
-    ~Engine();
+    Engine() = default;
     
     #pragma region Singleton
 
@@ -49,8 +52,7 @@ public:
         std::shared_ptr<SpawnableWindow> Window = nullptr;
     };
 private:
-    // Pointer to the implementation
-    std::unique_ptr<FEngineData> EngineData;
+    FEngineData EngineData;
 
     #pragma endregion
 
@@ -60,8 +62,24 @@ public:
     void Launch();
     void Quit();
 
+    #pragma region Object
 private:
-    //Objects
-    static std::vector<std::shared_ptr<Object>> Objects;
+    static std::vector<std::shared_ptr<Actor>> ObjectCache;
+
+public:
+
+    template<DerivedFromActor T, typename ...Args>
+    static std::shared_ptr<T> CreateActor(Args ...args);
+
+    #pragma endregion
+
     //static std::unique_ptr<class World> WorldInstance;
 };
+
+template<DerivedFromActor T, typename ...Args>
+std::shared_ptr<T> Engine::CreateActor(Args ...args)
+{
+    auto sptr = std::make_shared<T>(args...);
+    ObjectCache.push_back(sptr);
+    return sptr;
+}

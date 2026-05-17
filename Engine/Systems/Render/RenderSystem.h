@@ -16,12 +16,14 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <queue>
+#include <stdint.h>
 
+class RenderComponent;
 
 class RenderSystem final : 
 	public ThreadedTask,
 	public std::enable_shared_from_this<RenderSystem>
-
 {
 
 public:
@@ -111,5 +113,16 @@ public:
 
 	};
 	static FDX12Data DX12Data;
+	/*			Global ID | Render Component Instance */
+	static std::vector<RenderComponent> RenderComponentsCache;
 
+	#pragma region Rendering
+private:
+	std::queue<uint64_t> RenderQueue = {};
+
+	static uint64_t ComponentIDCounter;
+
+public:
+	static RenderComponent* CreateRenderComponent(class Object* Owner);
+	#pragma endregion
 };

@@ -5,20 +5,6 @@
 #include "Systems/Physics/PhysicsSystem.h"
 #include "Systems/Render/RenderSystem.h"
 
-#pragma region Construction And Destruction
-
-Engine::Engine() : EngineData(std::make_unique<FEngineData>())
-{
-}
-
-Engine::~Engine()
-{
-    if (EngineData.get())
-        EngineData.reset();
-}
-
-#pragma endregion
-
 void Engine::Init()
 {
     if (!EngineInstance.get())
@@ -26,9 +12,9 @@ void Engine::Init()
 
 #pragma region Spawn Window
 
-    EngineData->Window = std::make_shared<SpawnableWindow>();
+    EngineData.Window = std::make_shared<SpawnableWindow>();
 
-    if (SpawnableWindow* w = EngineData->Window.get())
+    if (SpawnableWindow* w = EngineData.Window.get())
         w->OnWindowDestroyedDelegate.Bind(EngineInstance, &Engine::Quit);
 
 #pragma endregion
@@ -36,7 +22,7 @@ void Engine::Init()
 #pragma region Spawn Systems
 
     // Create Base Systems
-    CreateThreadedTask<RenderSystem>(EngineData->Window);
+    CreateThreadedTask<RenderSystem>(EngineData.Window);
     CreateThreadedTask<PhysicsSystem>();
     CreateThreadedTask<CollisionSystem>();
 
@@ -47,11 +33,11 @@ void Engine::Launch()
 {
     Init();
 
-    EngineData->IsRunning = true;
-    while (EngineData->IsRunning)
+    EngineData.IsRunning = true;
+    while (EngineData.IsRunning)
     {
-        if (EngineData->Window.get())
-            EngineData->Window->PumpMessages();
+        if (EngineData.Window.get())
+            EngineData.Window->PumpMessages();
     }
 
     Quit();
@@ -59,7 +45,7 @@ void Engine::Launch()
 
 void Engine::Quit()
 {
-    EngineData->IsRunning = false;
+    EngineData.IsRunning = false;
     StopThreads();
 }
 
@@ -84,26 +70,25 @@ std::shared_ptr<T> Engine::CreateThreadedTask(Args ...args)
 {
     // Emplace back directly constructs the unique_ptr in the vector
     std::shared_ptr<T> NewTask = std::make_shared<T>(args...);
-    if (EngineData.get())
-        EngineData->Tasks.push_back(NewTask);
+    EngineData.Tasks.push_back(NewTask);
 
     return NewTask;
 }
 
 void Engine::StopThreads()
 {
-    for (const std::shared_ptr<ThreadedTask>& Task : EngineData->Tasks)
+    for (const std::shared_ptr<ThreadedTask>& Task : EngineData.Tasks)
     {
         if (Task)
             Task->StopThread();
     }
-    EngineData->Tasks.clear();
+    EngineData.Tasks.clear();
 }
 
 #pragma endregion
 
 #pragma region Objects
 
-std::vector<std::shared_ptr<Object>> Engine::Objects = {}; // Initialize empty
+std::vector<std::shared_ptr<Actor>> Engine::ObjectCache = {}; // Initialize empty
 
 #pragma endregion

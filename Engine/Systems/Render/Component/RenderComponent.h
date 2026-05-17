@@ -1,27 +1,13 @@
 #pragma once
-#include <string>
-#include <wrl/client.h>
-#include "d3d12.h"
+#include <stdint.h>
 
 
 class RenderComponent
 {
+	friend class RenderSystem; // To allow ID access
 public:
-	RenderComponent(std::string ShaderPath);
-	~RenderComponent();
+	RenderComponent(uint64_t GID);
+
 private:
-	static const std::string LogCategory;
-	std::string Shader = "";
-
-	void CreateCommandList();
-
-	struct FDX12Data
-	{
-		// Command Allocator
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandAllocator;
-
-		// Command List
-		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> CommandList;
-	};
-	FDX12Data DX12Data;
+	uint64_t GID = -1;
 };

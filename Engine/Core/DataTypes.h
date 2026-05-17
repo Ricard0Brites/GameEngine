@@ -16,7 +16,7 @@ enum class ELifeCycleState : uint8_t
 {
 	Uninitialized = 0,
 	Initializing = 1 << 0,	// 0x 0000 0001 = 1
-	Ready = 1 << 1,			// 0x 0000 0010 = 2
+	Initialized = 1 << 1,			// 0x 0000 0010 = 2
 	PendingKill = 1 << 2,	// 0x 0000 0100 = 4
 
 }; ENUM_CLASS_FLAGS(ELifeCycleState);

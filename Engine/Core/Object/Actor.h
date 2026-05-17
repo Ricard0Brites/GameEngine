@@ -9,7 +9,6 @@ class Actor :
 	public FTransform
 {
 public:
-	Actor(Object* Owner);
 	Actor(Object* Owner, const char* DisplayName);
 	~Actor();
 
@@ -17,5 +16,5 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	Object* GetOwner() { return ObjectData ? ObjectData->GetOwner() : nullptr; }
+	Object* GetOwner() { return ObjectData.GetOwner(); }
 };
