@@ -356,9 +356,9 @@ public:
 	// whether this transform is relative to a parent or not
 	bool IsRelative = false;
 
-	void SetLocation(FVector NewLocation) { std::lock_guard<std::mutex> lock(_locationMutex); _Location = NewLocation; }
-	void SetRotation(FVector NewRotation) { std::lock_guard<std::mutex> lock(_rotationMutex); _Rotation = NewRotation; }
-	void SetScale(FVector NewScale) { std::lock_guard<std::mutex> lock(_scaleMutex); _Scale = NewScale; }
+	void SetLocation(const FVector &NewLocation) { std::lock_guard<std::mutex> lock(_locationMutex); _Location = NewLocation; }
+	void SetRotation(const FVector &NewRotation) { std::lock_guard<std::mutex> lock(_rotationMutex); _Rotation = NewRotation; }
+	void SetScale(const FVector &NewScale) { std::lock_guard<std::mutex> lock(_scaleMutex); _Scale = NewScale; }
 
 
 	// Returns a copy of World location
