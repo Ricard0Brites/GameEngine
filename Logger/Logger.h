@@ -2,11 +2,8 @@
 #include <string>
 #include <map>
 
-#ifdef LOGGER_EXPORTS
 #define LOGGER_API 
-#else
-#define LOGGER_API 
-#endif
+
 
 class Logger
 {

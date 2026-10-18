@@ -1,12 +1,6 @@
 #include "Object.h"
 #include "Engine.h"
 
-#pragma region Static Implementations
-
-uint64_t Object::FObjectData::GlobalIDCounter = 0;
-
-#pragma endregion
-
 Object::Object(Object* InOwner)
 {
 	ObjectData.OnInitializedStarted();
@@ -28,7 +22,6 @@ Object::FObjectData::FObjectData()
 	// Using mutex lock to ensure async safety
 	static std::mutex id_mutex;
 	std::lock_guard<std::mutex> lock(id_mutex);
-	GlobalID = GlobalIDCounter++;
 	
 }
 
@@ -47,11 +40,6 @@ Object* Object::FObjectData::GetOwner()
 bool Object::FObjectData::GetIsPendingKill()
 {
 	return (LifecycleState & ELifeCycleState::PendingKill) != 0;
-}
-
-uint64_t Object::FObjectData::GetGID()
-{
-	return GlobalID;
 }
 
 #pragma endregion

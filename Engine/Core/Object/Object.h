@@ -10,7 +10,6 @@ public:
 	Object(Object* InOwner, const char* InDisplayName);
 	virtual void BeginPlay() = 0;
 	virtual void Tick(float DeltaSeconds) = 0;
-	uint64_t GetGID() { return ObjectData.GetGID(); }
 
 
 protected:
@@ -24,7 +23,6 @@ protected:
 		const std::string& GetDisplayName();
 		Object* GetOwner();
 		bool GetIsPendingKill();
-		uint64_t GetGID();
 
 		// NOTE - Add as needed
 
@@ -55,10 +53,10 @@ protected:
 
 		// Defines if the object is going to be destroyed or not (TODO - WIP GC)
 		ELifeCycleState LifecycleState = ELifeCycleState::Uninitialized;
-
-		uint64_t GlobalID = -1;
-
-		static uint64_t GlobalIDCounter;
 	};
 	FObjectData ObjectData;
+
+private:
+	GUID_META
+
 };

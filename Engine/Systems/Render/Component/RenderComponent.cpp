@@ -1,6 +1,10 @@
 #include "RenderComponent.h"
 
-RenderComponent::RenderComponent(uint64_t GID) : GID(GID)
+
+#include "Logger.h" // TODO REMOVE
+
+RenderComponent::RenderComponent()
 {
+	Logger::Log(Logger::ELogCategories::Verbose, "RENDER COMPONENT CONSTRUCT", "RenderComponent");
 
 }

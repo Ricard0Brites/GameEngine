@@ -4,9 +4,7 @@
 #include "Core\Core.h"
 #include <vector>
 
-class Actor : 
-	public Object,
-	public FTransform
+class Actor : public Object, public FTransform
 {
 public:
 	Actor(Object* Owner, const char* DisplayName);

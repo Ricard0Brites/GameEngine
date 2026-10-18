@@ -121,8 +121,5 @@ private:
 	std::queue<uint64_t> RenderQueue = {};
 
 	static uint64_t ComponentIDCounter;
-
-public:
-	static RenderComponent* CreateRenderComponent(class Object* Owner);
 	#pragma endregion
 };
