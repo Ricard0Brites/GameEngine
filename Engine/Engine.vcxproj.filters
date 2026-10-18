@@ -48,10 +48,10 @@
     <ClCompile Include="Systems\Render\Component\RenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Systems\Render\DX12TypeWrappers.cpp">
+    <ClCompile Include="Core\ThreadedTaskManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\ThreadedTaskManager.cpp">
+    <ClCompile Include="Core\Development\TestActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -108,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\ThreadedTaskManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Development\TestActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

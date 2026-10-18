@@ -304,14 +304,4 @@ bool RenderSystem::FDX12Data::CreateSwapchain(const HWND* WindowHandle)
 
 #pragma region Rendering
 
-RenderComponent* RenderSystem::CreateRenderComponent(Object* Owner)
-{
-	if (!Owner)
-		return nullptr;
-
-	RenderComponent* Comp = &RenderComponentsCache.emplace_back(Owner->GetGID());
-	
-	return Comp;
-}
-
 #pragma endregion

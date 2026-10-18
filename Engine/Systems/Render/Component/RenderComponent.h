@@ -1,13 +1,13 @@
 #pragma once
-#include <stdint.h>
+#include "Core/Core.h"
 
 
 class RenderComponent
 {
-	friend class RenderSystem; // To allow ID access
+	friend class RenderSystem; // Allows ID access
 public:
-	RenderComponent(uint64_t GID);
+	RenderComponent();
 
 private:
-	uint64_t GID = -1;
+	GUID_META
 };
