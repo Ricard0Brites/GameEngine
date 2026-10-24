@@ -107,6 +107,7 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClCompile Include="Core\ThreadedTaskManager.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine.h" />
+    <ClCompile Include="Systems\Base\ComponentBase.cpp" />
     <ClCompile Include="Systems\Collision\CollisionSystem.cpp" />
     <ClCompile Include="Systems\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Systems\Render\Component\RenderComponent.cpp" />
@@ -126,6 +127,7 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClInclude Include="Core\ThreadedTaskManager.h" />
     <ClInclude Include="GameplayStatics.h" />
     <ClInclude Include="IO\IO.h" />
+    <ClInclude Include="Systems\Base\ComponentBase.h" />
     <ClInclude Include="Systems\Collision\CollisionSystem.h" />
     <ClInclude Include="Systems\Physics\PhysicsSystem.h" />
     <ClInclude Include="Systems\Render\Component\RenderComponent.h" />

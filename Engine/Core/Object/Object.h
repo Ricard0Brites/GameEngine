@@ -10,7 +10,9 @@ public:
 	Object(Object* InOwner, const char* InDisplayName);
 	virtual void BeginPlay() = 0;
 	virtual void Tick(float DeltaSeconds) = 0;
-
+	
+	template<typename ComponentClass>
+	const GUID& AddComponent();
 
 protected:
 	struct FObjectData
@@ -60,3 +62,9 @@ private:
 	GUID_META
 
 };
+
+template<typename ComponentClass>
+const GUID& Object::AddComponent()
+{
+
+}
