@@ -1,12 +1,9 @@
 #include "RenderComponent.h"
+#include "Logger.h"
+#include <string>
 
-
-#include "Logger.h" // TODO REMOVE
-
-RenderComponent::RenderComponent() : ComponentBase(EEngineSystem::Render)
+RenderComponent::RenderComponent(ERenderMode RenderMode)
 {
-	Logger::Log(Logger::ELogCategories::Verbose, "RENDER COMPONENT CONSTRUCT", "RenderComponent");
-	Logger::Log(Logger::ELogCategories::Verbose, GUIDToString(GetInstanceGUID()), "RenderComponent");
-	Logger::Log(Logger::ELogCategories::Verbose, GUIDToString(GetClassGUID()), "RenderComponent");
-
+	if (RenderMode == ERenderMode::None)
+		Logger::Log(Logger::ELogCategories::Error, std::string(__func__) + " ERenderMode cannot be 'None'", "RenderComponent");
 }

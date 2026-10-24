@@ -29,6 +29,15 @@ enum class EEngineSystem
 
 }; ENUM_CLASS_FLAGS(EEngineSystem)
 
+enum class ERenderMode
+{
+	None,
+	UI,
+	World,
+	PostProcess
+
+}; ENUM_CLASS_FLAGS(ERenderMode)
+
 struct FVector
 {
 private:

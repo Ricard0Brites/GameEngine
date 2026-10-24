@@ -1,6 +1,21 @@
 #include "Core/Core.h"
 #include <string>
 #include <type_traits>
+#include <concepts>
+#include "Systems/Base/ComponentBase.h"
+
+template <typename T>
+struct IsDerivedFromComponentBase
+{
+	template <EEngineSystem S>
+	static std::true_type test(const ComponentBase<S>*);
+	static std::false_type test(...);
+
+	static constexpr bool value = decltype(test(std::declval<T*>()))::value;
+};
+
+template<typename T>
+concept DerivedFromComponentBase = IsDerivedFromComponentBase<T>::value;
 
 class Object
 {
@@ -10,8 +25,8 @@ public:
 	Object(Object* InOwner, const char* InDisplayName);
 	virtual void BeginPlay() = 0;
 	virtual void Tick(float DeltaSeconds) = 0;
-	
-	template<typename ComponentClass>
+
+	template<DerivedFromComponentBase ComponentClass>
 	const GUID& AddComponent();
 
 protected:
@@ -63,8 +78,8 @@ private:
 
 };
 
-template<typename ComponentClass>
+template<DerivedFromComponentBase ComponentClass>
 const GUID& Object::AddComponent()
 {
-
+	
 }
