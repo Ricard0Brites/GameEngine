@@ -21,6 +21,14 @@ enum class ELifeCycleState : uint8_t
 
 }; ENUM_CLASS_FLAGS(ELifeCycleState);
 
+enum class EEngineSystem
+{
+	Collision,
+	Render,
+	Physics
+
+}; ENUM_CLASS_FLAGS(EEngineSystem)
+
 struct FVector
 {
 private:

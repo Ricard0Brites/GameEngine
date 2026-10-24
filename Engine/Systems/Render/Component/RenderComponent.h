@@ -1,13 +1,10 @@
 #pragma once
-#include "Core/Core.h"
+#include "Systems/Base/ComponentBase.h"
 
 
-class RenderComponent
+class RenderComponent : ComponentBase
 {
 	friend class RenderSystem; // Allows ID access
 public:
 	RenderComponent();
-
-private:
-	GUID_META
 };
