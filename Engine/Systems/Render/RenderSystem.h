@@ -113,8 +113,6 @@ public:
 
 	};
 	static FDX12Data DX12Data;
-	/*			Global ID | Render Component Instance */
-	static std::vector<RenderComponent> RenderComponentsCache;
 
 	#pragma region Rendering
 private:

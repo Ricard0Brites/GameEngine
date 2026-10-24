@@ -3,7 +3,7 @@
 #include "Core/Object/Actor.h"
 #include "Systems/Render/Component/RenderComponent.h"
 
-class TestActor : public Actor, public RenderComponent
+class TestActor : public Actor
 {
 
 public:

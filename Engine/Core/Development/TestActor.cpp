@@ -2,6 +2,7 @@
 
 TestActor::TestActor(Object* Owner, const char* DisplayName) : Actor(Owner, DisplayName)
 {
+	AddComponent<RenderComponent>();
 
 }
 
