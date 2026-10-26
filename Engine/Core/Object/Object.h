@@ -8,10 +8,10 @@ template <typename T>
 struct IsDerivedFromComponentBase
 {
 	template <EEngineSystem S>
-	static std::true_type test(const ComponentBase<S>*);
-	static std::false_type test(...);
+	static std::true_type Test(const ComponentBase<S>*);
+	static std::false_type Test(...);
 
-	static constexpr bool value = decltype(test(std::declval<T*>()))::value;
+	static constexpr bool value = decltype(Test(std::declval<T*>()))::value;
 };
 
 template<typename T>
@@ -81,5 +81,7 @@ private:
 template<DerivedFromComponentBase ComponentClass>
 const GUID& Object::AddComponent()
 {
-	
+	// TODO - Implement this function
+	GUID a;
+	return a;
 }

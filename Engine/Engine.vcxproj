@@ -132,6 +132,8 @@ dxgi.lib;Logger.lib;</AdditionalDependencies>
     <ClInclude Include="Systems\Base\EngineSystemBase.h" />
     <ClInclude Include="Systems\Collision\CollisionSystem.h" />
     <ClInclude Include="Systems\Physics\PhysicsSystem.h" />
+    <ClInclude Include="Systems\Base\RegistryBase.h" />
+    <ClInclude Include="Systems\Registry\Interfaces.h" />
     <ClInclude Include="Systems\Render\Component\RenderComponent.h" />
     <ClInclude Include="Systems\Render\Component\RenderComponent2D.h" />
     <ClInclude Include="Systems\Render\DX12TypeWrappers.h" />

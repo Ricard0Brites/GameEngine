@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include <memory>
 #include "Windows/Spawnable/SpawnableWindow.h"
+
+//Systems
 #include "Systems/Collision/CollisionSystem.h"
 #include "Systems/Physics/PhysicsSystem.h"
 #include "Systems/Render/RenderSystem.h"
@@ -18,6 +20,10 @@ void Engine::Init()
         w->OnWindowDestroyedDelegate.Bind(EngineInstance, &Engine::Quit);
 
 #pragma endregion
+
+
+// Create Systems Registry
+EngineData.SystemsRegistry = std::make_shared<RegistryBase<IEngineSystemRegistryObject>>();
 
 #pragma region Spawn Systems
 

@@ -11,7 +11,7 @@
 
 // Static Initializations
 const std::string RenderSystem::LogCategory = "D3D12_Renderer";
-std::vector<RenderComponent> RenderSystem::RenderComponentsCache = {};
+
 uint64_t RenderSystem::ComponentIDCounter = 0;
 
 RenderSystem::RenderSystem(std::shared_ptr<SpawnableWindow> InAssociatedWindow)

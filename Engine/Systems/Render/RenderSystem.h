@@ -18,12 +18,14 @@
 #include <map>
 #include <queue>
 #include <stdint.h>
+#include "Systems/Base/EngineSystemBase.h"
 
 class RenderComponent;
 
 class RenderSystem final : 
 	public ThreadedTask,
-	public std::enable_shared_from_this<RenderSystem>
+	public std::enable_shared_from_this<RenderSystem>,
+	public EngineSystemBase<EEngineSystem::Render>
 {
 
 public:
