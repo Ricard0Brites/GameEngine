@@ -1,11 +1,18 @@
 #pragma once
 #include "Core/Core.h"
 #include "Windows/Spawnable/SpawnableWindow.h"
+
+// Standard Library
 #include <vector>
 #include <type_traits>
 
+// Registry
+#include "Systems/Base/RegistryBase.h"
+#include "Systems/Registry/Interfaces.h"
+
 class ThreadedTask;
 class Actor;
+class EngineSystemsRegistry;
 
 template <typename T>
 concept DerivedFromThreadedTask = std::is_base_of_v<ThreadedTask, T>;
@@ -33,6 +40,9 @@ public:
     //Threaded Tasks
     template<DerivedFromThreadedTask T, typename ...Args>
     std::shared_ptr<T> CreateThreadedTask(Args ...args);
+    
+    template<typename T>
+    std::shared_ptr<T> GetTaskOfClass();
 private:
     void StopThreads();
     
@@ -45,6 +55,8 @@ public:
     {
         bool IsRunning = false;
 
+        std::shared_ptr<RegistryBase<IEngineSystemRegistryObject>> SystemsRegistry = nullptr;
+        
         // Keeps a reference & ownership of all threaded tasks
         std::vector<std::shared_ptr<ThreadedTask>> Tasks;
 
@@ -75,6 +87,20 @@ public:
 
     //static std::unique_ptr<class World> WorldInstance;
 };
+
+template<typename T>
+std::shared_ptr<T>
+Engine::GetTaskOfClass()
+{
+    for (std::shared_ptr<ThreadedTask> Task : EngineData.Tasks)
+    {
+        if (auto Casted = std::dynamic_pointer_cast<T>(Task))
+        {
+            return Casted;
+        }
+    }
+    return nullptr;
+}
 
 template<DerivedFromActor T, typename ...Args>
 std::shared_ptr<T> Engine::CreateActor(Args ...args)

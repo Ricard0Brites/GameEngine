@@ -1,16 +1,24 @@
 #pragma once
 #include <vector>
+#include "ComponentBase.h"
 
-class ComponentBase;
 // TODO - Finish implementing
-class SystemBase
+template<EEngineSystem SystemType>
+class EngineSystemBase
 {
 public:
-	SystemBase();
-
-
+	EngineSystemBase();
 
 private:
 	/* Component Instance */
-	static std::vector<ComponentBase> ComponentsCache;
+	static std::vector<ComponentBase<SystemType>> ComponentsCache;
 };
+
+template<EEngineSystem SystemType>
+EngineSystemBase<SystemType>::EngineSystemBase()
+{
+	ComponentsCache.empty();
+}
+
+template<EEngineSystem SystemType>
+__declspec(selectany) std::vector<ComponentBase<SystemType>> EngineSystemBase<SystemType>::ComponentsCache;
