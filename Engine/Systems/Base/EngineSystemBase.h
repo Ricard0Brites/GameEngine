@@ -17,7 +17,7 @@ private:
 template<EEngineSystem SystemType>
 EngineSystemBase<SystemType>::EngineSystemBase()
 {
-	ComponentsCache.empty();
+	ComponentsCache.clear();
 }
 
 template<EEngineSystem SystemType>
