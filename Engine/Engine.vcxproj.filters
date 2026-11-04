@@ -136,9 +136,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <FxCompile Include="Systems\Render\Shader\BasicShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Systems\Render\Shader\BasicShader.hlsl" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
