@@ -24,6 +24,7 @@ public:
 	};
 
 	LOGGER_API static void Log(ELogCategories LogLevel, std::string Message, std::string SystemTag);
+	LOGGER_API static void LogTemp(std::string Message);
 	LOGGER_API static void Clear();
 
 private:
