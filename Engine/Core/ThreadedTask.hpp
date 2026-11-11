@@ -14,8 +14,10 @@ public:
 
     #pragma endregion
     
-    ThreadedTask() : TaskData(std::make_unique<FData>())
+    ThreadedTask(std::string ThreadName) : TaskData(std::make_unique<FData>())
     {
+        TaskData->ThreadName = ThreadName;
+
         Init();
     }
 
@@ -26,17 +28,49 @@ public:
 
 private:
 
+    std::string LogCategory = "Engine_ThreadedTask";
+
     // Internal synchronous execution -> Parent thread
     void Init()
     {
-        TaskData->IsRunning = true;
+        Logger::Log(Logger::ELogCategories::Verbose, "Attempting to create Threaded Task '" + TaskData->ThreadName + "';", LogCategory);
+
         TaskData->Thread = std::make_unique<std::thread>(&ThreadedTask::Async_Init, this);
+
+        if (!TaskData->Thread || !TaskData->Thread->joinable())
+        {
+            Logger::Log(Logger::ELogCategories::Error, "Threaded Task '" + TaskData->ThreadName + "' was not created. Please Refer to ThreadedTask::Init;", LogCategory);
+            return;
+        }
+		
+        // Set Thread state (In Main Thread)
+        TaskData->IsRunning = true;
+
+        // Set Thread Name
+        {
+            int size = MultiByteToWideChar(CP_UTF8, 0, TaskData->ThreadName.c_str(), -1, nullptr, 0);
+
+            if (size > 0)
+            {
+			    std::wstring wideName(size, L'\0');
+
+			    MultiByteToWideChar(
+				    CP_UTF8, 0, TaskData->ThreadName.c_str(), -1,
+				    wideName.data(), size
+			    );
+
+			    SetThreadDescription(TaskData->Thread->native_handle(), wideName.c_str());
+            }
+        }
     }
 
     // Internal asynchronous loop -> New Thread
     void Async_Init()
     {
-        AsyncInit();
+		Logger::Log(Logger::ELogCategories::Verbose, "Created Threaded Task '" + TaskData->ThreadName + "';", LogCategory);
+
+
+        AsyncInit(); // Virtual Event
 
         // Tick
         std::chrono::steady_clock::time_point PreviousFrame = std::chrono::high_resolution_clock::now();
@@ -46,7 +80,7 @@ private:
             std::chrono::duration<float> DeltaTime = CurrentFrame - PreviousFrame;
             PreviousFrame = CurrentFrame;
 
-            AsyncTick(DeltaTime.count());
+            AsyncTick(DeltaTime.count()); // Virtual Event
         }
     }
     
@@ -72,6 +106,7 @@ private:
     {
         std::unique_ptr<std::thread> Thread = nullptr; // Friend declaration allows the engine to access 
         bool IsRunning = false;
+        std::string ThreadName = "Unnamed Threaded Task";
     };
 
     std::unique_ptr<FData> TaskData = nullptr;

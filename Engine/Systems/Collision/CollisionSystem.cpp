@@ -1,6 +1,6 @@
 #include "CollisionSystem.h"
 
-CollisionSystem::CollisionSystem()
+CollisionSystem::CollisionSystem() : ThreadedTask("Collision Thread")
 {
 
 }
