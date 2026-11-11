@@ -2,7 +2,7 @@
 #include <string>
 #include <type_traits>
 #include <concepts>
-#include "Systems/Base/ComponentBase.h"
+#include "Core/ComponentBase.h"
 
 template <typename T>
 struct IsDerivedFromComponentBase
