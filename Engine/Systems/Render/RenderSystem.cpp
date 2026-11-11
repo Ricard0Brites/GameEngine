@@ -1,20 +1,18 @@
 #include "RenderSystem.h"
-#include "Component/RenderComponent.h"
 
-#include <iostream>
 #include <utility>
 #include <memory>
 
 #include "Logger.h"
 #include "Windows/Spawnable/SpawnableWindow.h"
-#include "Core/Object/Object.h"
 
 // Static Initializations
 const std::string RenderSystem::LogCategory = "D3D12_Renderer";
 
 uint64_t RenderSystem::ComponentIDCounter = 0;
 
-RenderSystem::RenderSystem(std::shared_ptr<SpawnableWindow> InAssociatedWindow)
+RenderSystem::RenderSystem(std::shared_ptr<SpawnableWindow> InAssociatedWindow) :
+	ThreadedTask("RenderThread")
 {
 	DX12Data.AssociatedWindow = InAssociatedWindow;
 }

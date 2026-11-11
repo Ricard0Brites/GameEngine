@@ -1,7 +1,7 @@
 #include "PhysicsSystem.h"
 #include <iostream>
 
-PhysicsSystem::PhysicsSystem() : ThreadedTask()
+PhysicsSystem::PhysicsSystem() : ThreadedTask("Physics Thread")
 {
 
 }
