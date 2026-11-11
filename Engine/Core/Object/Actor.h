@@ -1,8 +1,6 @@
 #pragma once
 #include "object.h"
 #include "Core\DataTypes.h"
-#include "Core\Core.h"
-#include <vector>
 
 class Actor : public Object, public FTransform
 {

@@ -18,12 +18,12 @@ concept DerivedFromComponentBase = IsDerivedFromComponentBase<T>::value;
 
 class Object : public IRegistryObject
 {
-	
+
 public:
 	Object(Object* InOwner);
 	Object(Object* InOwner, const char* InDisplayName);
-	virtual void BeginPlay() = 0;
-	virtual void Tick(float DeltaSeconds) = 0;
+	virtual void BeginPlay();
+	virtual void Tick(float DeltaSeconds);
 
 	template<DerivedFromComponentBase ComponentClass, typename... Args>
 	const GUID& AddComponent(Args&&... args);
@@ -31,6 +31,7 @@ public:
 protected:
 	struct FObjectData
 	{
+		friend Object;
 	public:
 		FObjectData();
 
@@ -49,7 +50,7 @@ protected:
 		void SetDisplayName(const char* InName);
 		void SetOwner(Object* InOwner);
 		void SetPendingKill();
-		void CacheComponent(const GUID& ClassGUID, std::unique_ptr<ComponentBase> Component) { ComponentsCache[ClassGUID].push_back(std::move(Component)); }
+		void CacheComponent(const GUID& ClassGUID, std::unique_ptr<ComponentBase> Component);
 
 		#pragma endregion
 
@@ -90,6 +91,8 @@ protected:
 		* 
 		*/
 		std::map<GUID, std::vector<std::unique_ptr<ComponentBase>>, GUIDComparator> ComponentsCache;
+
+		bool bHasBeginPlayAlreadyRun = false;
 	};
 	FObjectData ObjectData;
 

@@ -13,6 +13,23 @@ Object::Object(Object* InOwner, const char* InDisplayName) : Object(InOwner)
 	ObjectData.OnInitializedFinished();
 }
 
+void Object::BeginPlay()
+{
+	for (const auto& [Guid, Components] : ObjectData.ComponentsCache)
+		for (const auto& Comp : Components)
+			if (Comp)
+				Comp->BeginPlay();
+	ObjectData.bHasBeginPlayAlreadyRun = true;
+}
+
+void Object::Tick(float DeltaSeconds)
+{
+	for (const auto& [Guid, Components] : ObjectData.ComponentsCache)
+		for (const auto& Comp : Components)
+			if (Comp)
+				Comp->Tick(DeltaSeconds);
+}
+
 #pragma region FObjectData Structure
 
 Object::FObjectData::FObjectData()
@@ -59,6 +76,19 @@ void Object::FObjectData::SetOwner(Object* InOwner)
 void Object::FObjectData::SetPendingKill()
 {
 	LifecycleState = ELifeCycleState::PendingKill;
+}
+
+void Object::FObjectData::CacheComponent(const GUID& ClassGUID, std::unique_ptr<ComponentBase> Component)
+{
+	// Store a raw pointer to the component
+	auto* CompRaw = Component.get();
+
+	// Move the unique pointer
+	ComponentsCache[ClassGUID].push_back(std::move(Component));
+	
+	// Execute BeginPlay on component addition if begin play has already been executed.
+	if (bHasBeginPlayAlreadyRun && CompRaw)
+		CompRaw->BeginPlay();
 }
 
 void Object::FObjectData::OnInitializedStarted()
