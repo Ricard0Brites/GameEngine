@@ -12,7 +12,7 @@ int main()
 		__debugbreak();
 
 	std::shared_ptr<TestActor> Tester = EngineInstance->CreateActor<TestActor>(nullptr, "Test Actor 1");
-
+	Tester->AddComponent<RenderComponent>(ERenderMode::World);
 
 	EngineInstance->Launch(); // Game Loop
 
