@@ -1,8 +1,8 @@
 #pragma once
 
 
-class IEngineSystemRegistryObject
+class IRegistryObject
 {
 public:
-	virtual ~IEngineSystemRegistryObject() = default;
+	virtual ~IRegistryObject() = default;
 };

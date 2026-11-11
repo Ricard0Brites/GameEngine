@@ -8,19 +8,31 @@
 * _IDMetadata.InstanceID;
 */
 #define GUID_META \
-struct IDMetadata\
-{\
-IDMetadata()\
-{\
-if (FAILED(CoCreateGuid(&ClassID)))\
-{\
-Logger::Log(Logger::ELogCategories::Critical, std::string(__FILE__) + " " + std::string(__FUNCTION__) + "failed to assign class GUID", "GUID");\
-}\
-if (FAILED(CoCreateGuid(&InstanceID)))\
-{\
-Logger::Log(Logger::ELogCategories::Critical, std::string(__FILE__) + " " + std::string(__func__) + "failed to assign Instance GUID", "GUID");\
-}}\
-inline static GUID ClassID;\
-GUID InstanceID;\
-};\
-IDMetadata _IDMetadata;
+private:\
+    struct IDMetadata \
+    {\
+        IDMetadata() \
+        {\
+            if (ClassID.Data1 == 0 && ClassID.Data2 == 0 && ClassID.Data3 == 0) \
+            {\
+                if (((HRESULT)(CoCreateGuid(&ClassID))) < 0) \
+                {\
+                    Logger::Log(Logger::ELogCategories::Critical, std::string(__FILE__) + " " + std::string(__FUNCTION__) + " failed to assign class GUID", "GUID");\
+                }\
+            }\
+            if (((HRESULT)(CoCreateGuid(&InstanceID))) < 0) \
+            {\
+                Logger::Log(Logger::ELogCategories::Critical, std::string(__FILE__) + " " + std::string(__FUNCTION__) + " failed to assign Instance GUID", "GUID");\
+            }\
+        }\
+        inline static GUID ClassID{}; \
+        GUID InstanceID{};\
+    };\
+    IDMetadata _IDMetadata; /* Defines Class Global ID and instance Global ID*/\
+public:\
+    inline const GUID& GetInstanceGUID() const {\
+        return _IDMetadata.InstanceID;\
+    }\
+    static inline const GUID& GetClassGUID() {\
+        return IDMetadata::ClassID;\
+    }

@@ -47,21 +47,29 @@ private:
     void StopThreads();
     
     #pragma endregion
+       
+    #pragma region Registry
+public:
+	const RegistryBase<IRegistryObject>& GetRegistry(EEngineSystem RegistryType);
+    #pragma endregion
 
-    #pragma region Pointer To Implementation
+    #pragma region PImPl
 
 public:
     struct FEngineData
     {
+    public:
         bool IsRunning = false;
 
-        std::shared_ptr<RegistryBase<IEngineSystemRegistryObject>> SystemsRegistry = nullptr;
-        
         // Keeps a reference & ownership of all threaded tasks
         std::vector<std::shared_ptr<ThreadedTask>> Tasks;
 
         // Main Window
         std::shared_ptr<SpawnableWindow> Window = nullptr;
+
+        // Map of EEngineSystem to std::unique_ptr<RegistryBase>
+        // This has been made with down-casting capabilities in mind through an interface object type
+        std::unordered_map< EEngineSystem, std::unique_ptr<RegistryBase<IRegistryObject>> > SystemRegistries = {};
     };
 private:
     FEngineData EngineData;

@@ -1,14 +1,13 @@
 #include "Core/Core.h"
 #include <string>
 #include <type_traits>
-#include <concepts>
+#include "Systems/Registry/Interfaces.h"
 #include "Core/ComponentBase.h"
 
 template <typename T>
 struct IsDerivedFromComponentBase
 {
-	template <EEngineSystem S>
-	static std::true_type Test(const ComponentBase<S>*);
+	static std::true_type Test(const ComponentBase*);
 	static std::false_type Test(...);
 
 	static constexpr bool value = decltype(Test(std::declval<T*>()))::value;
@@ -17,7 +16,7 @@ struct IsDerivedFromComponentBase
 template<typename T>
 concept DerivedFromComponentBase = IsDerivedFromComponentBase<T>::value;
 
-class Object
+class Object : public IRegistryObject
 {
 	
 public:
@@ -26,8 +25,8 @@ public:
 	virtual void BeginPlay() = 0;
 	virtual void Tick(float DeltaSeconds) = 0;
 
-	template<DerivedFromComponentBase ComponentClass>
-	const GUID& AddComponent();
+	template<DerivedFromComponentBase ComponentClass, typename... Args>
+	const GUID& AddComponent(Args&&... args);
 
 protected:
 	struct FObjectData
@@ -50,6 +49,12 @@ protected:
 		void SetDisplayName(const char* InName);
 		void SetOwner(Object* InOwner);
 		void SetPendingKill();
+		void CacheComponent(const GUID& ClassGUID, std::unique_ptr<ComponentBase> Component) { ComponentsCache[ClassGUID].push_back(std::move(Component)); }
+
+		#pragma endregion
+
+		#pragma region Delegate Callbacks
+
 		void OnInitializedStarted();
 		void OnInitializedFinished();
 
@@ -70,6 +75,21 @@ protected:
 
 		// Defines if the object is going to be destroyed or not (TODO - WIP GC)
 		ELifeCycleState LifecycleState = ELifeCycleState::Uninitialized;
+
+		struct GUIDComparator
+		{
+			bool operator()(const GUID& A, const GUID& B) const
+			{
+				return memcmp(&A, &B, sizeof(GUID)) < 0;
+			}
+		};
+
+		/*
+		* GUID - The GUID of the component class
+		* std::unique_ptr of the component itself
+		* 
+		*/
+		std::map<GUID, std::vector<std::unique_ptr<ComponentBase>>, GUIDComparator> ComponentsCache;
 	};
 	FObjectData ObjectData;
 
@@ -78,10 +98,41 @@ private:
 
 };
 
-template<DerivedFromComponentBase ComponentClass>
-const GUID& Object::AddComponent()
+template<DerivedFromComponentBase ComponentClass, typename... Args>
+const GUID& Object::AddComponent(Args&&... args)
 {
-	// TODO - Implement this function
-	GUID a;
-	return a;
+
+	Logger::Log(Logger::ELogCategories::Verbose, "Attempting to create component '" + std::string(typeid(ComponentClass).name()) + "';", "Engine");
+	/*
+	note:
+	 - now we're creating components that live inside each object... this is not optimized.
+	 In the future this should be changed to work with an ECS for cache locality optimizations
+	*/
+
+	//Create Component (Heap)
+	std::unique_ptr<ComponentBase> Comp = std::make_unique<ComponentClass>(args...);
+
+	GUID ClassGUID = ComponentClass::GetClassGUID();
+	if (IsEqualGUID(ClassGUID, GUID_NULL))
+	{
+		Logger::Log(Logger::ELogCategories::Error, "Attempt to create component classGUID is invalid. '" + std::string(typeid(ComponentClass).name()) + "::AddComponent' returning.", "Engine");
+		return GUID_NULL;
+	}
+
+	if (!Comp.get())
+	{
+		Logger::Log(Logger::ELogCategories::Error, "Attempt to create component '" + std::string(typeid(ComponentClass).name()) + "' failed.", "Engine");
+		return GUID_NULL;
+	}
+
+	Logger::Log(Logger::ELogCategories::Success, "Created component '" + std::string(typeid(ComponentClass).name()) + "' successfully.", "Engine");
+
+	//Cache Instance GUID
+	GUID InstanceGUID = Comp->GetInstanceGUID();
+
+	//Change ownership to the array
+	ObjectData.CacheComponent(ClassGUID, std::move(Comp));
+	
+	//return InstanceGUID;
+	return ClassGUID;
 }
