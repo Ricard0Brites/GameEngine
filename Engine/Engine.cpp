@@ -33,12 +33,26 @@ EngineData.SystemsRegistry = std::make_shared<RegistryBase<IEngineSystemRegistry
     CreateThreadedTask<CollisionSystem>();
 
 #pragma endregion
+
+    // Wait until all tasks start running
+    bool bAllThreadedTasksAreReady = false;
+    while (!bAllThreadedTasksAreReady)
+    {
+        bAllThreadedTasksAreReady = true;
+        for (const std::shared_ptr<ThreadedTask>& Task : EngineData.Tasks)
+        {
+            if (!Task->IsRunning())
+                bAllThreadedTasksAreReady = false;
+
+        }
+    }
 }
 
 void Engine::Launch()
 {
     Init();
 
+    Logger::Log(Logger::ELogCategories::Success, "All Threaded tasks are ready, starting game loop;", "Engine");
     EngineData.IsRunning = true;
     while (EngineData.IsRunning)
     {
