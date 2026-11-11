@@ -42,9 +42,6 @@ private:
             Logger::Log(Logger::ELogCategories::Error, "Threaded Task '" + TaskData->ThreadName + "' was not created. Please Refer to ThreadedTask::Init;", LogCategory);
             return;
         }
-		
-        // Set Thread state (In Main Thread)
-        TaskData->IsRunning = true;
 
         // Set Thread Name
         {
@@ -67,8 +64,10 @@ private:
     // Internal asynchronous loop -> New Thread
     void Async_Init()
     {
-		Logger::Log(Logger::ELogCategories::Verbose, "Created Threaded Task '" + TaskData->ThreadName + "';", LogCategory);
+		Logger::Log(Logger::ELogCategories::Success, "Created Threaded Task '" + TaskData->ThreadName + "';", LogCategory);
 
+		// Set Thread state (In Main Thread)
+		TaskData->IsRunning = true;
 
         AsyncInit(); // Virtual Event
 
