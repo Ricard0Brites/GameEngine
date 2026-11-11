@@ -21,10 +21,6 @@ void Engine::Init()
 
 #pragma endregion
 
-
-// Create Systems Registry
-EngineData.SystemsRegistry = std::make_shared<RegistryBase<IEngineSystemRegistryObject>>();
-
 #pragma region Spawn Systems
 
     // Create Base Systems
@@ -110,5 +106,15 @@ void Engine::StopThreads()
 #pragma region Objects
 
 std::vector<std::shared_ptr<Actor>> Engine::ObjectCache = {}; // Initialize empty
+
+#pragma endregion
+
+#pragma region Registry
+
+const RegistryBase<IRegistryObject>& Engine::GetRegistry(EEngineSystem RegistryType)
+{
+	// If one doesn't exist std creates it automatically
+	return *EngineData.SystemRegistries[RegistryType];
+}
 
 #pragma endregion

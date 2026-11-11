@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include <utility>
 #include <mutex>
 
 /*
@@ -11,7 +10,7 @@ template<typename RegistryObjectType>
 class RegistryBase
 {
 public:
-    void Register(std::shared_ptr<RegistryObjectType> Object)
+    void Register(const std::shared_ptr<RegistryObjectType>& Object)
     {
         std::lock_guard<std::mutex> Lock(Mutex);
         RegisteredObjects.push_back(Object);

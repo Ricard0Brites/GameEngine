@@ -1,9 +1,9 @@
 //Modules
 #include <memory> // shared_ptr
 #include "Engine.h"
-#include "Core/Object/Actor.h"
-#include "Core/Development/TestActor.h"
 
+#include "Core/Development/TestActor.h" // Development Only... DELETE LATER
+#include "Systems/Render/Component/RenderComponent.h" 
 
 int main()
 {	
