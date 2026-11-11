@@ -54,6 +54,8 @@ void Engine::Launch()
     {
         if (EngineData.Window.get())
             EngineData.Window->PumpMessages();
+
+        // TODO - implement BeginPlay and Tick for actors
     }
 
     Quit();
