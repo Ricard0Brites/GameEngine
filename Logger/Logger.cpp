@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 #include <chrono>
+#include <mutex>
 
 
 
@@ -22,10 +23,27 @@ void Logger::Log(ELogCategories LogLevel, std::string Message, std::string Syste
 {
 	#if (_DEBUG || _WRITETOLOG)
 
+	//Thread safety to avoid mixed outputs
+	static std::mutex M;
+	std::lock_guard Lock(M);
+
 	std::cout << ColorMap[LogLevel]  << GetPreciseTimeStamp().c_str() << Message << "\x1b[0m" << std::endl;
 	WriteToLog(SystemTag, Message);
 	
 	#endif
+}
+
+void Logger::LogTemp(std::string Message)
+{
+#if (_DEBUG || _WRITETOLOG)
+
+	//Thread safety to avoid mixed outputs (cout already has thread safety but sometimes \n is ignored so this fixes that issue... its a bit crude but it works and it's the fastest approach)
+	static std::mutex M;
+	std::lock_guard Lock(M);
+
+	std::cout << ColorMap[ELogCategories::Custom1] << GetPreciseTimeStamp().c_str() << Message << "\x1b[0m" << std::endl;
+
+#endif
 }
 
 void Logger::Clear()
