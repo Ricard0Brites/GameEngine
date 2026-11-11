@@ -133,6 +133,5 @@ const GUID& Object::AddComponent(Args&&... args)
 	//Change ownership to the array
 	ObjectData.CacheComponent(ClassGUID, std::move(Comp));
 	
-	//return InstanceGUID;
-	return ClassGUID;
+	return InstanceGUID;
 }
